@@ -1,14 +1,6 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.io.*;
+
+import java.text.*;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
 
@@ -42,6 +34,8 @@ public class processFileProgram {
 				String subS = storage.substring(startPosition, endPosition).trim();
 				
 				//formatting the date properly
+				
+				//I still have to format the date properly
 				String start_dt = "2011-01-01";
 				DateFormat formatter = new SimpleDateFormat("yyyy-MM-DD"); 
 				Date date = (Date)formatter.parse(start_dt);
