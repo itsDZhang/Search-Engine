@@ -37,7 +37,7 @@ public class processFileProgram {
 			//determining the ending of each file 
 			if(line.contains("</DOC>")) {
 				getMetaData(storage4Data, internalId); 
-				makeFolder(storage4Data);
+//				makeFolder(storage4Data);
 				makeFile(storage4File, internalId, storage4Data);
 				storage4Data = "";
 				storage4File = new ArrayList<String>();
@@ -50,12 +50,7 @@ public class processFileProgram {
 	}
 	
 	
-	public static void makeFolder(String storage) throws ParseException {
-		
-		
-		
-		
-	}
+	
 	//Extracts each file from another 
 	public static void makeFile(ArrayList<String> storage4File, int internalId, String storage4Data) throws FileNotFoundException, UnsupportedEncodingException, ParseException {
 		
