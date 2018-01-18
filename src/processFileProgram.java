@@ -1,4 +1,5 @@
 import java.io.*;
+import java.text.DateFormatSymbols;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.text.*;
@@ -10,6 +11,7 @@ import java.util.zip.GZIPInputStream;
 
 public class processFileProgram {
 	
+//	int internalId = 0;
 
 	public static void main(String[] args) throws IOException, ParseException {
 		// TODO Auto-generated method stub
@@ -34,7 +36,7 @@ public class processFileProgram {
 			
 			//determining the ending of each file 
 			if(line.contains("</DOC>")) {
-				getMetaData(storage4Data); 
+				getMetaData(storage4Data, internalId); 
 				makeFolder(storage4Data);
 				makeFile(storage4File, internalId, storage4Data);
 				storage4Data = "";
@@ -112,26 +114,44 @@ public class processFileProgram {
 		return date;
 	}
 	
-	public static void getMetaData(String storage) throws ParseException {
-		// To find the date of the current File
-		if(storage.contains("</DATE>")) {
-			
-			int startPosition = storage.indexOf("<DATE><P>") + "<DATE><P>".length();
-			int endPosition = storage.indexOf("</P></DATE>", startPosition);
-			String subS = storage.substring(startPosition, endPosition).trim();
-//			System.out.println(subS);
-			
-			
+	public static void getMetaData(String storage, int internalId) throws ParseException {
+		String date = getDateAsNum(storage);
+//		System.out.println(date.substring(3,5));
+		
+		int monthNum = Integer.parseInt(date.substring(3,5));
+		String month = new DateFormatSymbols().getMonths()[monthNum-1];
+		
+		String year = "19" + date.substring(0,2);
+		
+		String day = date.substring(6,8);
+		String docNo = "";
+		String headLine = "";
+		
+		if (day.substring(0,1).contains("0")) {
+			day = day.substring(1, 2);
 		}
+		
+		
 		
 		if(storage.contains("</DOCNO>")) {
 			
 			int startPosition = storage.indexOf("<DOCNO>") + "<DOCNO>".length();
 			int endPosition = storage.indexOf("</DOCNO>", startPosition);
-			String subS = storage.substring(startPosition, endPosition).trim();
+			docNo = storage.substring(startPosition, endPosition).trim();
 			
 //			System.out.println(subS);
 		}
+		if(storage.contains("</HEADLINE>")) {
+			
+			int startPosition = storage.indexOf("<HEADLINE>") + "<HEADLINE>".length();
+			int endPosition = storage.indexOf("</HEADLINE>", startPosition);
+			headLine = storage.substring(startPosition, endPosition).trim();
+			
+			headLine = headLine.replaceAll("<.*?>", "");
+			
+//			System.out.println(subS);
+		}
+		System.out.println( month + " " + day + " " + year + " Internal id: " + internalId + " docNo: " + docNo + " Headline: " + headLine);
 		
 					
 	}
