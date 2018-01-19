@@ -1,13 +1,25 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormatSymbols;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.text.*;
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
 import java.util.zip.GZIPInputStream;
+//import metaData.java;
 
 public class processFileProgram {
 	
@@ -15,16 +27,19 @@ public class processFileProgram {
 
 	public static void main(String[] args) throws IOException, ParseException {
 		// TODO Auto-generated method stub
-		readGzipFile();
-		
+//		metaData yolo = new metaData();
+		readAndProcess();
 	}
 	
-	public static void readGzipFile() throws IOException, ParseException {
+	@SuppressWarnings("unchecked")
+	public static void readAndProcess() throws IOException, ParseException{
 		File latimesFile = new File("./latimes.gz");
 		InputStream fileStream = new FileInputStream(latimesFile);
 		InputStream gzipStream = new GZIPInputStream(fileStream);
 		Reader decoder = new InputStreamReader(gzipStream);
 		BufferedReader buffered = new BufferedReader(decoder);
+		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
+		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
 		
 		String line = "";
 		int internalId = 0;
@@ -36,17 +51,54 @@ public class processFileProgram {
 			
 			//determining the ending of each file 
 			if(line.contains("</DOC>")) {
-				getMetaData(storage4Data, internalId); 
-//				makeFolder(storage4Data);
+				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
+				doc2Id.put(getDocNo(storage4Data),internalId);
 				makeFile(storage4File, internalId, storage4Data);
+//				
+//				
+//				try {
+//			         FileOutputStream fileOut =
+//			         new FileOutputStream("data.txt");
+//			         ObjectOutputStream out = new ObjectOutputStream(fileOut);
+//			         out.writeObject(id2MetaData);
+//			         out.close();
+//			         fileOut.close();
+//			         System.out.printf("test");
+//			      } catch (IOException i) {
+//			         i.printStackTrace();
+//			      }
+//				HashMap<Integer,metaData> id2MetaDataFinal = new HashMap<>();
+//				try {
+//			         FileInputStream fileIn = new FileInputStream("data.txt");
+//			         ObjectInputStream in = new ObjectInputStream(fileIn);
+//			         id2MetaDataFinal = (HashMap<Integer,metaData>) in.readObject();
+//			         in.close();
+//			         fileIn.close();
+//			      } catch (IOException i) {
+//			         i.printStackTrace();
+//			         return;
+//			      }
+//			      catch (ClassNotFoundException c) {
+//			         System.out.println("Employee class not found");
+//			         c.printStackTrace();
+//			         return;
+//			      }
+//			      
+//			      System.out.println(id2MetaDataFinal.get(internalId));
+				
 				storage4Data = "";
 				storage4File = new ArrayList<String>();
 				internalId +=1;
-				
 			}
 		}
-		buffered.close();
+//		Properties properties = new Properties();
+//		for (Map.Entry<String,Integer> entry : doc2Id.entrySet()) {
+//		    properties.put(entry.getKey(), entry.getValue());
+//		}
+//		properties.store(new FileOutputStream("data.properties"), null);
 		
+		
+		buffered.close();
 	}
 	
 	
@@ -80,6 +132,15 @@ public class processFileProgram {
 		writer.close();
 	}
 	
+	public static String getDocNo(String storage) {
+		
+		int startPosition = storage.indexOf("<DOCNO>") + "<DOCNO>".length();
+		int endPosition = storage.indexOf("</DOCNO>", startPosition);
+		String docNo = storage.substring(startPosition, endPosition).trim();
+		
+		return docNo;
+	}
+	
 	public static String getDateAsNum(String storage) throws ParseException {
 		
 		String month = "";
@@ -90,9 +151,8 @@ public class processFileProgram {
 		
 		if(storage.contains("</DOCNO>")) {
 			
-			int startPosition = storage.indexOf("<DOCNO>") + "<DOCNO>".length();
-			int endPosition = storage.indexOf("</DOCNO>", startPosition);
-			String docNum = storage.substring(startPosition, endPosition).trim();
+			
+			String docNum = getDocNo(storage);
 			
 			docNum = docNum.replaceAll("\\D+","");
 //			System.out.println(docNum);
@@ -109,10 +169,10 @@ public class processFileProgram {
 		return date;
 	}
 	
-	public static void getMetaData(String storage, int internalId) throws ParseException {
+	public static metaData getMetaData(String storage, int internalId) throws ParseException {
 		String date = getDateAsNum(storage);
 //		System.out.println(date.substring(3,5));
-		
+		System.out.println(date);
 		int monthNum = Integer.parseInt(date.substring(3,5));
 		String month = new DateFormatSymbols().getMonths()[monthNum-1];
 		
@@ -130,9 +190,8 @@ public class processFileProgram {
 		
 		if(storage.contains("</DOCNO>")) {
 			
-			int startPosition = storage.indexOf("<DOCNO>") + "<DOCNO>".length();
-			int endPosition = storage.indexOf("</DOCNO>", startPosition);
-			docNo = storage.substring(startPosition, endPosition).trim();
+			
+			docNo = getDocNo(storage);
 			
 //			System.out.println(subS);
 		}
@@ -148,14 +207,10 @@ public class processFileProgram {
 		}
 		System.out.println( month + " " + day + " " + year + " Internal id: " + internalId + " docNo: " + docNo + " Headline: " + headLine);
 		
+		metaData data = new metaData(internalId, docNo, headLine, date );
+		return data;
 					
 	}
-	
-	
-	
-	
-	
-	
 	
 	
 	
