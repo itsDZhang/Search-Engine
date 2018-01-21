@@ -93,15 +93,14 @@ public class IndexEngine {
 	}
 	
 	public static void saveHashMap2File(HashMap<String, Integer> doc2Id,HashMap<Integer, metaData> id2MetaData, String localPathProcess ) throws FileNotFoundException, UnsupportedEncodingException {
+		
 		PrintWriter writerA = new PrintWriter(localPathProcess + "/doc2Id.txt", "UTF-8");
 		PrintWriter writerB = new PrintWriter(localPathProcess + "/id2MetaData.txt", "UTF-8");
 		
 		for (Map.Entry<String, Integer> entry : doc2Id.entrySet()) {
-//			System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
 			String key = (String) entry.getKey();
 			String value = entry.getValue().toString();
 			writerA.println(key + "|" + value);
-//			System.out.println(key + " = " + value);
 		}
 		for (Map.Entry<Integer, metaData> entry : id2MetaData.entrySet()) {
 			metaData toCopy = (metaData) entry.getValue();
