@@ -11,48 +11,37 @@ public class GetDoc {
 
 	public static void main(String[] args) throws FileNotFoundException, ParseException {
 		// TODO Auto-generated method stub
-		
 		if(args.length < 3) {
 			System.out.println("You did not input sufficient arguements. This program must accept 3 arguements");
 			System.out.println("First Arguement: a path to the location of the documents and metadata created from the IndexEngine");
 			System.out.println("Second Arguement: either the strings \"id\" or \"docno\" ");
 			System.out.println("Third Arguement: either the internal integer id or the document's docno");
 			System.exit(0);
-			
 		}
-		
-		String currentDir = System.getProperty("user.dir");
-		System.out.println(currentDir);
+//		String currentDir = System.getProperty("user.dir");
+//		System.out.println(currentDir);
 		String localPath = args[0];
 		String type = args[1];
 		String DocOrId = args[2];
-		
-		
-		
+//		The two hashmaps to add
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
 		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
 		doc2Id = generateDoc2IdHash(localPath);
 		id2MetaData = generateid2MetaDataHash(localPath);
-		
 		if (type.contains("id")) {
 			int search = Integer.parseInt(DocOrId);
 			runAsId(id2MetaData, search, localPath );
 		} else if ( type.contains("docno")) {
 			runAsDocNo(doc2Id, id2MetaData, DocOrId, localPath );
 		}
-		
-
-		
-		
 	}
-	
+//	This method will activate if user is searching up by internal id
 	public static void runAsId(HashMap<Integer, metaData> id2MetaData, int searchId, String localPath) throws FileNotFoundException, ParseException {
 		metaData testB = id2MetaData.get(searchId);
 		String date = getDateNum(testB.getDocNo());
 		Scanner text = new Scanner( 
-				new FileReader(localPath + "/results/" + date + "/" + 
+				new FileReader(localPath + "/filesToBeStored/" + date + "/" + 
 						searchId + ".txt"));
-		
 		System.out.println("DocNo: " + testB.getDocNo());
 		System.out.println("Internal Id: " + testB.getId());
 		System.out.println("Headline: " + testB.getHeadline());
@@ -62,11 +51,12 @@ public class GetDoc {
 			System.out.println(text.nextLine());
 		}
 	}
+//	This method will activate if user is searching by docno 
 	public static void runAsDocNo(HashMap<String, Integer> doc2Id, HashMap<Integer, metaData> id2MetaData, String searchString, String localPath) throws ParseException, FileNotFoundException {
 		metaData testA = id2MetaData.get(doc2Id.get(searchString));
 		String date = getDateNum(searchString);
 		Scanner text = new Scanner( 
-				new FileReader(localPath + "/results/" + date + "/" + 
+				new FileReader(localPath + "/filesToBeStored/" + date + "/" + 
 						doc2Id.get(searchString) + ".txt"));
 		
 		System.out.println("DocNo: " + testA.getDocNo());
@@ -79,7 +69,7 @@ public class GetDoc {
 		}
 	}
 	
-	
+//	This method grabs the docno to id txt file, reads the file and populates it
 	public static HashMap<String, Integer> generateDoc2IdHash(String localPath) throws FileNotFoundException {
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
 		Scanner docno2idtxt = new Scanner(new FileReader(localPath + "/doc2Id.txt"));
@@ -94,6 +84,7 @@ public class GetDoc {
 		}
 		return doc2Id;
 	}
+//	This method grabs the id to metadata txt file, reads it, and populates the hashmap	
 	public static HashMap<Integer, metaData> generateid2MetaDataHash(String localPath) throws FileNotFoundException {
 		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
 		Scanner id2MetaDatatxt = new Scanner(new FileReader(localPath +"/id2MetaData.txt"));
@@ -107,22 +98,17 @@ public class GetDoc {
 		}
 		return id2MetaData;
 	}
+//	Converts the string the string to a number
 	public static String getDateNum(String docNum) throws ParseException {
-		
 		String month = "";
 		String day = "";
 		String year = "";
 		String date = "";
-		
 			docNum = docNum.replaceAll("\\D+","");
-//			System.out.println(docNum);
 			month = docNum.substring(0,2);
 			day = docNum.substring(2,4);
 			year = docNum.substring(4,6);
-			
-		
 		date = year  + month  + day;
-		
 		return date;
 	}
 
