@@ -25,19 +25,28 @@ import java.util.zip.GZIPInputStream;
 public class IndexEngine {
 	
 	public static void main(String[] args) throws IOException, ParseException {
-		if(args.length < 2) {
-			System.out.println("You did not input sufficient arguements. This program must accept two arguements");
-			System.out.println("First Arguement: a path to the latimes.gz file");
-			System.out.println("Second Arguement: a path to a directory where the documents and metadata are being stored");
-			System.exit(0);
-		}
-		String localPathGzip = args[0];
-		String localPathProcess = args[1];
-		File results = new File(localPathProcess + "/filesToBeStored");
-		if ( results.exists()) {
-			System.out.println("The directory "+ "filesToBeStored" + " already exists.");
-	    	System.exit(0);
-		}
+		
+//		String currentDir = System.getProperty("user.dir");
+//		System.out.println(currentDir);
+		
+//		if(args.length < 2) {
+//			System.out.println("You did not input sufficient arguements. This program must accept two arguements");
+//			System.out.println("First Arguement: a path to the latimes.gz file");
+//			System.out.println("Second Arguement: a path to a directory where the documents and metadata are being stored");
+//			System.exit(0);
+//		}
+//		String localPathGzip = args[0];
+//		String localPathProcess = args[1];
+		
+		String localPathProcess = "C:/Users/Rui/eclipse-workspace/541-Hw1";
+		String localPathGzip = "C:/Users/Rui/eclipse-workspace/541-Hw1/latimes.gz";
+		
+		
+//		File results = new File(localPathProcess + "/filesToBeStored");
+//		if ( results.exists()) {
+//			System.out.println("The directory "+ "filesToBeStored" + " already exists.");
+//	    	System.exit(0);
+//		}
 		readAndProcess(localPathGzip, localPathProcess);
 	}
 	
@@ -52,24 +61,34 @@ public class IndexEngine {
 		//initializes the first two hashmaps
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
 		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
-		
 		String line = "";
 		int internalId = 0;
 		ArrayList<String> storage4File = new ArrayList<String>();
 //		Setting an temp storage
 		String storage4Data = "";
 		
+		HashMap <String,Integer> term2Id = new HashMap<>();
+		HashMap <Integer, String> id2Term = new HashMap<>();
+		
+		
 		while(data.hasNextLine()) {
 			line = data.nextLine();
 			storage4Data += line;
 			storage4File.add(line);
+			System.out.println(line);
+			
 //			Populating the temp stroage until the </doc> tag gets hit
 			if(line.contains("</DOC>")) {
+				ArrayList<String> tokens = extractTokens(storage4Data);
 //				grabs the current file, gets the id, docno, metadata
 //				and puts them into its hashmaps and makes a file
-				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
+				id2MetaData.put(internalId, getMetaData(storage4Data, internalId, tokens)); 
 				doc2Id.put(getDocNo(storage4Data),internalId);
 				makeFile(storage4File, internalId, storage4Data, localPathProcess);
+				
+				//======================= Get rid of the tokens arraylist ======= Copy what is done in class =---------------------
+				
+				
 //				Clears the temp story for the next file
 				storage4Data = "";
 				storage4File = new ArrayList<String>();
@@ -82,6 +101,50 @@ public class IndexEngine {
 
 		
 		buffered.close();
+	}
+	public static ArrayList<String> extractTokens(String storage) {
+		String rawText = "";
+		int startPosition = storage.indexOf("<TEXT>") + "<TEXT>".length();
+		int endPosition = storage.indexOf("</TEXT>", startPosition);
+		
+		rawText = storage.substring(startPosition, endPosition).trim();
+		startPosition = storage.indexOf("<HEADLINE>") + "<HEADLINE>".length();
+		endPosition = storage.indexOf("</HEADLINE>", startPosition);
+		rawText += storage.substring(startPosition, endPosition).trim();
+		startPosition = storage.indexOf("<GRAPHIC>") + "<GRAPHIC>".length();
+		endPosition = storage.indexOf("</GRAPHIC>", startPosition);
+		rawText += storage.substring(startPosition, endPosition).trim();
+		
+		rawText = rawText.replaceAll("<P>", "");
+		rawText = rawText.replaceAll("</P>", "");
+		//tokenize
+		ArrayList<String> tokens = tokenize(rawText);
+		
+		
+		return tokens;
+		
+	}
+	//To tokenize
+	public static ArrayList<String> tokenize(String text) {
+		text = text.toLowerCase();
+		ArrayList<String> tokens = new ArrayList<String>();
+		int start = 0;
+		int i =0;
+		
+		for (i=0;i<text.length();++i) {
+			char c = text.charAt(i);
+			if( !Character.isLetterOrDigit(c) ) {
+				if( start != i) {
+					String token = text.substring(start, i-start);
+					tokens.add(token);
+				}
+				start = i+1;
+			}
+		}
+		if(start!=i) {
+			tokens.add(text.substring(start, i-start));
+		}
+		return tokens;
 	}
 //	Saving the hashmaps to file
 	public static void saveHashMap2File(HashMap<String, Integer> doc2Id,HashMap<Integer, metaData> id2MetaData, String localPathProcess ) throws FileNotFoundException, UnsupportedEncodingException {
@@ -156,7 +219,7 @@ public class IndexEngine {
 		date = year  + month  + day;
 		return date;
 	}
-	public static metaData getMetaData(String storage, int internalId) throws ParseException {
+	public static metaData getMetaData(String storage, int internalId, ArrayList<String> tokens) throws ParseException {
 		String date = getDateAsNum(storage);
 		int monthNum = Integer.parseInt(date.substring(2,4));
 		String month = new DateFormatSymbols().getMonths()[monthNum-1];
@@ -177,7 +240,8 @@ public class IndexEngine {
 			headLine = storage.substring(startPosition, endPosition).trim();
 			headLine = headLine.replaceAll("<.*?>", "");
 		}
-		metaData data = new metaData(internalId, docNo, headLine, date );
+		String docLength = String.valueOf(tokens.size());
+		metaData data = new metaData(internalId, docNo, headLine, date, docLength);
 		return data;
 	}
 }

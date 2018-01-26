@@ -5,7 +5,9 @@ public class metaData {
 	private String headLine = "";
 	private String date = "";
 	private int internalId = 0;
-    public metaData ( int internalId, String docNo, String headLine, String date) {
+	private String docLength = "";
+    public metaData ( int internalId, String docNo, String headLine, String date, String documentLength) {
+    	this.docLength = documentLength;
     	this.docNo = docNo;
     	this.headLine = headLine;
     	this.date = date;
@@ -23,6 +25,9 @@ public class metaData {
     public void setDate(String date) {
     	this.date = date;
     }
+    public void setDocLength(String length) {
+    	this.docLength = length;
+    }
     public int getId() {
     	
     	return this.internalId;
@@ -35,5 +40,8 @@ public class metaData {
     }
     public String getDate() {
     	return this.date;
+    }
+    public String docLength() {
+    	return this.docLength;
     }
 }

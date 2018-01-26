@@ -93,7 +93,7 @@ public class GetDoc {
 			String[] nextLineArr = nextLine.split("\\|");
 			int key = Integer.parseInt(nextLineArr[0]);
 			String[] data = nextLineArr[1].split("\\{}");
-			metaData meta = new metaData(Integer.parseInt(data[0]), data[1], data[2],data[3]);
+			metaData meta = new metaData(Integer.parseInt(data[0]), data[1], data[2],data[3], data[4]);
 			id2MetaData.put(key, meta);
 		}
 		return id2MetaData;
