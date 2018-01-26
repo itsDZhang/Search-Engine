@@ -67,8 +67,8 @@ public class IndexEngine {
 //		Setting an temp storage
 		String storage4Data = "";
 		
-		HashMap <String,Integer> term2Id = new HashMap<>();
-		HashMap <Integer, String> id2Term = new HashMap<>();
+		HashMap <String,Integer> term2IdLexicon = new HashMap<>();
+		HashMap <Integer, String> id2TermLexicon = new HashMap<>();
 		
 		
 		while(data.hasNextLine()) {
@@ -79,10 +79,12 @@ public class IndexEngine {
 			
 //			Populating the temp stroage until the </doc> tag gets hit
 			if(line.contains("</DOC>")) {
-				ArrayList<String> tokens = extractTokens(storage4Data);
+				
+				buildIndex(storage4Data);
+//				ArrayList<String> tokens = extractTokens(storage4Data);
 //				grabs the current file, gets the id, docno, metadata
 //				and puts them into its hashmaps and makes a file
-				id2MetaData.put(internalId, getMetaData(storage4Data, internalId, tokens)); 
+				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
 				doc2Id.put(getDocNo(storage4Data),internalId);
 				makeFile(storage4File, internalId, storage4Data, localPathProcess);
 				
@@ -102,6 +104,74 @@ public class IndexEngine {
 		
 		buffered.close();
 	}
+	public static void buildIndex(String document) {
+//		==================Place holder ==============================
+		HashMap <String,Integer> term2IdLexicon = new HashMap<>(); 
+		HashMap <Integer, String> id2TermLexicon = new HashMap<>();
+		HashMap<Integer, String> invertedIndex = new HashMap<>();
+		int docId = 0;
+//		=============================================================
+		
+		ArrayList<String> tokens = extractTokens(document);
+		ArrayList<Integer> tokenIds = convertTokens2Ids(tokens, term2IdLexicon, id2TermLexicon);
+		HashMap<Integer, Integer> wordCounts = countWords(tokenIds);
+		
+		add2Posting(wordCounts, docId, invertedIndex);
+		
+		
+	}
+	
+//	converting to tokenId
+	public static ArrayList<Integer> convertTokens2Ids(ArrayList<String> tokens, HashMap <String,Integer> term2IdLexicon, HashMap <Integer, String> id2TermLexicon) {
+		ArrayList<Integer> tokenIds = new ArrayList<>();
+		
+		for (String i: tokens) {
+			if(term2IdLexicon.containsKey(i)) {
+				tokenIds.add(term2IdLexicon.get(i));
+			} else {
+				int id = term2IdLexicon.size();
+				term2IdLexicon.put(i, id);
+				tokenIds.add(id);
+			}
+					
+		}
+		return tokenIds;
+	}
+//	Count words
+	public static HashMap<Integer, Integer> countWords(ArrayList<Integer> tokenIds) {
+//		term id to count
+		HashMap<Integer, Integer> wordCounts = new HashMap<>();
+		for (int id: tokenIds) {
+			if (wordCounts.containsKey(id)) {
+				wordCounts.put(id, wordCounts.get(id)+1);
+			} else {
+				wordCounts.put(id, 1);
+			}
+			
+		}
+		return wordCounts;
+		
+	}
+	public static void add2Posting(HashMap<Integer, Integer> wordCount, int docId, HashMap<Integer, String> invertedIndex) {
+		
+		for (int termId: wordCount.keySet()) {
+			int count = wordCount.get(termId);
+			if (invertedIndex.containsKey(termId)) {
+				String postings = invertedIndex.get(termId);
+			} else {
+				// create the posting and add to the inverted Index
+				//append docId and count to posting
+			}
+		}
+		
+		for (Map.Entry<Integer, Integer> entry : wordCount.entrySet()) {
+			
+			
+		    System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+		}
+	}
+	
+//	Tokenize
 	public static ArrayList<String> extractTokens(String storage) {
 		String rawText = "";
 		int startPosition = storage.indexOf("<TEXT>") + "<TEXT>".length();
@@ -219,7 +289,7 @@ public class IndexEngine {
 		date = year  + month  + day;
 		return date;
 	}
-	public static metaData getMetaData(String storage, int internalId, ArrayList<String> tokens) throws ParseException {
+	public static metaData getMetaData(String storage, int internalId) throws ParseException {
 		String date = getDateAsNum(storage);
 		int monthNum = Integer.parseInt(date.substring(2,4));
 		String month = new DateFormatSymbols().getMonths()[monthNum-1];
@@ -240,6 +310,7 @@ public class IndexEngine {
 			headLine = storage.substring(startPosition, endPosition).trim();
 			headLine = headLine.replaceAll("<.*?>", "");
 		}
+		ArrayList<String> tokens = extractTokens(storage);
 		String docLength = String.valueOf(tokens.size());
 		metaData data = new metaData(internalId, docNo, headLine, date, docLength);
 		return data;
