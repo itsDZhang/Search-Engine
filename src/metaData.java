@@ -41,7 +41,7 @@ public class metaData {
     public String getDate() {
     	return this.date;
     }
-    public String docLength() {
+    public String getDocLength() {
     	return this.docLength;
     }
 }

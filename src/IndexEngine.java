@@ -17,14 +17,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 //import metaData.java;
 
 public class IndexEngine {
 	
-	public static void main(String[] args) throws IOException, ParseException {
+	public static void main(String[] args) throws IOException, ParseException, ClassNotFoundException {
 		
 //		String currentDir = System.getProperty("user.dir");
 //		System.out.println(currentDir);
@@ -50,7 +53,7 @@ public class IndexEngine {
 		readAndProcess(localPathGzip, localPathProcess);
 	}
 	
-	public static void readAndProcess(String localPathGzip, String localPathProcess) throws IOException, ParseException{
+	public static void readAndProcess(String localPathGzip, String localPathProcess) throws IOException, ParseException, ClassNotFoundException{
 //		Reads the zip file
 		File latimesFile = new File(localPathGzip);
 		InputStream fileStream = new FileInputStream(latimesFile);
@@ -69,24 +72,43 @@ public class IndexEngine {
 		
 		HashMap <String,Integer> term2IdLexicon = new HashMap<>();
 		HashMap <Integer, String> id2TermLexicon = new HashMap<>();
-		
-		
-		while(data.hasNextLine()) {
+		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex = new HashMap<>();
+		for(int i = 0; i <10000; i ++) {
+//		while(data.hasNextLine()) {
 			line = data.nextLine();
 			storage4Data += line;
 			storage4File.add(line);
-			System.out.println(line);
-			
+//			System.out.println(line);
 //			Populating the temp stroage until the </doc> tag gets hit
 			if(line.contains("</DOC>")) {
+
+//				buildIndex(storage4Data);
+				ArrayList<String> tokens = extractTokens(storage4Data);
 				
-				buildIndex(storage4Data);
+				tokenIdLexicon data4tokensLexicon = convertTokens2Ids(tokens, term2IdLexicon, id2TermLexicon);
+				HashMap <String,Integer> term2IdTemp = data4tokensLexicon.getTerm2IdLexicon();
+				
+				for(String j: term2IdTemp.keySet()) {
+//					System.out.println(j);
+					if(!term2IdLexicon.containsKey(j)) {
+//						term2IdLexicon.put(j, term2IdLexicon.get(j) + term2IdTemp.get(j));
+//					} else {
+						term2IdLexicon.put(j, term2IdTemp.get(j));
+					}
+				}
+				
+				ArrayList<Integer> tokenIds = data4tokensLexicon.getTokens();
+				HashMap<Integer, Integer> wordCounts = countWords(tokenIds);
+				invertedIndex= add2Posting(wordCounts, internalId, invertedIndex);
+				
+				
+				
 //				ArrayList<String> tokens = extractTokens(storage4Data);
 //				grabs the current file, gets the id, docno, metadata
 //				and puts them into its hashmaps and makes a file
-				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
-				doc2Id.put(getDocNo(storage4Data),internalId);
-				makeFile(storage4File, internalId, storage4Data, localPathProcess);
+//				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
+//				doc2Id.put(getDocNo(storage4Data),internalId);
+//				makeFile(storage4File, internalId, storage4Data, localPathProcess);
 				
 				//======================= Get rid of the tokens arraylist ======= Copy what is done in class =---------------------
 				
@@ -95,34 +117,85 @@ public class IndexEngine {
 				storage4Data = "";
 				storage4File = new ArrayList<String>();
 				internalId +=1;
-				System.out.println("Creating file with internal id: " + internalId + " and adding it to two hashmaps ");
+//				System.out.println("Creating file with internal id: " + internalId + " and adding it to two hashmaps ");
 			}
 			
 		}
+		id2TermLexicon = reverseHashMap(term2IdLexicon);
+		
 		saveHashMap2File(doc2Id, id2MetaData, localPathProcess);
+		saveInvertedIndexLexicon(invertedIndex, id2TermLexicon, term2IdLexicon);
 
 		
 		buffered.close();
 	}
-	public static void buildIndex(String document) {
-//		==================Place holder ==============================
-		HashMap <String,Integer> term2IdLexicon = new HashMap<>(); 
-		HashMap <Integer, String> id2TermLexicon = new HashMap<>();
-		HashMap<Integer, String> invertedIndex = new HashMap<>();
-		int docId = 0;
-//		=============================================================
+	public static HashMap<Integer,String> reverseHashMap(HashMap<String,Integer> map) {
+	    HashMap<Integer, String> rev = new HashMap<>();
+	    for(Entry<String, Integer> entry : map.entrySet())
+	        rev.put(entry.getValue(), entry.getKey());
+	    return rev;
+	}
+	public static void saveInvertedIndexLexicon(HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex, 
+		HashMap <Integer, String> id2TermLexicon, 
+		HashMap <String,Integer> term2IdLexicon) throws IOException, ClassNotFoundException {
 		
-		ArrayList<String> tokens = extractTokens(document);
-		ArrayList<Integer> tokenIds = convertTokens2Ids(tokens, term2IdLexicon, id2TermLexicon);
-		HashMap<Integer, Integer> wordCounts = countWords(tokenIds);
+//		Writing inverted index
+		FileOutputStream file = new FileOutputStream(new File("invertedIndex.txt"));
+		ObjectOutputStream toWrite = new ObjectOutputStream(file);
+		toWrite.writeObject(invertedIndex);
+//		Writing id 2 term lexicon
+		file = new FileOutputStream(new File("id2TermLexicon.txt"));
+		toWrite = new ObjectOutputStream(file);
+		toWrite.writeObject(id2TermLexicon);
+//		Writing term 2 id lexicon
+		file = new FileOutputStream(new File("term2IdLexicon.txt"));
+		toWrite = new ObjectOutputStream(file);
+		toWrite.writeObject(term2IdLexicon);
 		
-		add2Posting(wordCounts, docId, invertedIndex);
+		file.close();
+		toWrite.close();
 		
+//		Reading inverted Index
+		FileInputStream fileRead = new FileInputStream(new File("invertedIndex.txt"));
+		ObjectInputStream toRead = new ObjectInputStream(fileRead);
+		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndexRead  = (HashMap<Integer, ArrayList<DocIDCountPair>>) toRead.readObject();
+//		Reading term 2 id Lexicon
+		fileRead = new FileInputStream(new File("term2IdLexicon.txt"));
+		toRead = new ObjectInputStream(fileRead);
+		HashMap <String, Integer> term2IdLexiconRead =  (HashMap<String, Integer>) toRead.readObject();
+//		Reading id 2 term lexicon
+		fileRead = new FileInputStream(new File("id2TermLexicon.txt"));
+		toRead = new ObjectInputStream(fileRead);
+		HashMap <Integer, String> id2TermLexiconRead =  (HashMap<Integer, String>) toRead.readObject();
+		
+		
+		for(int i : invertedIndexRead.keySet()) {
+			ArrayList<DocIDCountPair> temp = invertedIndexRead.get(i);
+			System.out.println("Term Id: " + i);
+			System.out.println("Term Name: " + id2TermLexiconRead.get(i));
+			for(DocIDCountPair j: temp) {
+				System.out.println("Word is: " + id2TermLexiconRead.get(j.getDocID()));
+				System.out.println(j.getDocID());
+				System.out.println(j.getCount());
+				System.out.println("---");
+				
+			}
+			System.out.println("---End of Temp---");
+			
+		}
+//		for(String i : term2IdLexiconRead.keySet()) {
+//			System.out.println("key: " + i + " Value: " + term2IdLexiconRead.get(i));
+//		}
+//		
+		
+		
+
 		
 	}
+
 	
 //	converting to tokenId
-	public static ArrayList<Integer> convertTokens2Ids(ArrayList<String> tokens, HashMap <String,Integer> term2IdLexicon, HashMap <Integer, String> id2TermLexicon) {
+	public static tokenIdLexicon convertTokens2Ids(ArrayList<String> tokens, HashMap <String,Integer> term2IdLexicon, HashMap <Integer, String> id2TermLexicon) {
 		ArrayList<Integer> tokenIds = new ArrayList<>();
 		
 		for (String i: tokens) {
@@ -131,11 +204,13 @@ public class IndexEngine {
 			} else {
 				int id = term2IdLexicon.size();
 				term2IdLexicon.put(i, id);
+//				id2TermLexicon.put(id, i);
 				tokenIds.add(id);
 			}
-					
 		}
-		return tokenIds;
+		
+		tokenIdLexicon temp = new tokenIdLexicon(tokenIds, term2IdLexicon, id2TermLexicon);
+		return temp;
 	}
 //	Count words
 	public static HashMap<Integer, Integer> countWords(ArrayList<Integer> tokenIds) {
@@ -152,41 +227,51 @@ public class IndexEngine {
 		return wordCounts;
 		
 	}
-	public static void add2Posting(HashMap<Integer, Integer> wordCount, int docId, HashMap<Integer, String> invertedIndex) {
+	public static HashMap<Integer, ArrayList<DocIDCountPair>> add2Posting(HashMap<Integer, Integer> wordCount, int docId, HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex) {
 		
 		for (int termId: wordCount.keySet()) {
+			ArrayList<DocIDCountPair> postings = new ArrayList<>();
 			int count = wordCount.get(termId);
 			if (invertedIndex.containsKey(termId)) {
-				String postings = invertedIndex.get(termId);
+				postings = invertedIndex.get(termId);
+				DocIDCountPair temp = new DocIDCountPair(docId, count);
+				postings.add(temp);
 			} else {
-				// create the posting and add to the inverted Index
-				//append docId and count to posting
+				postings = new ArrayList<DocIDCountPair>();
+				DocIDCountPair temp = new DocIDCountPair(docId, count);
+				postings.add(temp);
 			}
+//			invertedIndex.put(termId, postings); 
+			invertedIndex.put(termId,postings);
 		}
-		
-		for (Map.Entry<Integer, Integer> entry : wordCount.entrySet()) {
-			
-			
-		    System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
-		}
+		return invertedIndex;
 	}
 	
 //	Tokenize
 	public static ArrayList<String> extractTokens(String storage) {
 		String rawText = "";
-		int startPosition = storage.indexOf("<TEXT>") + "<TEXT>".length();
-		int endPosition = storage.indexOf("</TEXT>", startPosition);
+		int startPosition = 0;
+		int endPosition = 0;
+		if(storage.contains("</TEXT>")) {
+			startPosition = storage.indexOf("<TEXT>") + "<TEXT>".length();
+			endPosition = storage.indexOf("</TEXT>", startPosition);
+			rawText = storage.substring(startPosition, endPosition).trim();
+		}
 		
-		rawText = storage.substring(startPosition, endPosition).trim();
-		startPosition = storage.indexOf("<HEADLINE>") + "<HEADLINE>".length();
-		endPosition = storage.indexOf("</HEADLINE>", startPosition);
-		rawText += storage.substring(startPosition, endPosition).trim();
-		startPosition = storage.indexOf("<GRAPHIC>") + "<GRAPHIC>".length();
-		endPosition = storage.indexOf("</GRAPHIC>", startPosition);
-		rawText += storage.substring(startPosition, endPosition).trim();
-		
-		rawText = rawText.replaceAll("<P>", "");
-		rawText = rawText.replaceAll("</P>", "");
+		if(storage.contains("</HEADLINE>")) {
+			startPosition = storage.indexOf("<HEADLINE>") + "<HEADLINE>".length();
+			endPosition = storage.indexOf("</HEADLINE>", startPosition);
+			rawText += storage.substring(startPosition, endPosition).trim();
+		}
+		if(storage.contains("</GRAPHIC>")) {
+			startPosition = storage.indexOf("<GRAPHIC>") + "<GRAPHIC>".length();
+			endPosition = storage.indexOf("</GRAPHIC>", startPosition);
+			rawText += storage.substring(startPosition, endPosition).trim();
+		}
+		if(rawText.contains("</P>")) {
+			rawText = rawText.replaceAll("<P>", "");
+			rawText = rawText.replaceAll("</P>", "");
+		}
 		//tokenize
 		ArrayList<String> tokens = tokenize(rawText);
 		
@@ -202,20 +287,39 @@ public class IndexEngine {
 		int i =0;
 		
 		for (i=0;i<text.length();++i) {
-			char c = text.charAt(i);
-			if( !Character.isLetterOrDigit(c) ) {
-				if( start != i) {
-					String token = text.substring(start, i-start);
+			String c = text.substring(i, i+1);
+			if(  checkForCharAndDigits(c) ) {
+				if( start != i ) {
+					String token = text.substring(start, i);
 					tokens.add(token);
 				}
 				start = i+1;
 			}
+			
 		}
 		if(start!=i) {
 			tokens.add(text.substring(start, i-start));
 		}
 		return tokens;
 	}
+	public static boolean checkForCharAndDigits(String str) {
+        Matcher m = Pattern.compile("[^a-zA-Z0-9]").matcher(str);
+        if (m.find()) return true;
+        else          return false;
+    }
+//	public static void buildIndex(String document) {
+////		==================Place holder ==============================
+//		HashMap <String,Integer> term2IdLexicon = new HashMap<>(); 
+//		HashMap <Integer, String> id2TermLexicon = new HashMap<>();
+//		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex = new HashMap<>();
+//		int docId = 0;
+////		=============================================================
+//		
+//		ArrayList<String> tokens = extractTokens(document);
+//		ArrayList<Integer> tokenIds = convertTokens2Ids(tokens, term2IdLexicon, id2TermLexicon);
+//		HashMap<Integer, Integer> wordCounts = countWords(tokenIds);
+//		add2Posting(wordCounts, docId, invertedIndex);
+//	}
 //	Saving the hashmaps to file
 	public static void saveHashMap2File(HashMap<String, Integer> doc2Id,HashMap<Integer, metaData> id2MetaData, String localPathProcess ) throws FileNotFoundException, UnsupportedEncodingException {
 		
@@ -241,7 +345,7 @@ public class IndexEngine {
 	public static String getDataFromMetadata(metaData value) {
 		String finalValue = "";
 		finalValue = value.getId() + "{}" + value.getDocNo() + 
-				"{}" + value.getHeadline() + "{}" + value.getDate();
+				"{}" + value.getHeadline() + "{}" + value.getDate() + "{}" + value.getDocLength();
 		return finalValue;
 	}
 	//Makes the file 
