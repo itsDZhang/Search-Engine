@@ -73,18 +73,22 @@ public class IndexEngine {
 		HashMap <String,Integer> term2IdLexicon = new HashMap<>();
 		HashMap <Integer, String> id2TermLexicon = new HashMap<>();
 		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex = new HashMap<>();
-		for(int i = 0; i <10000; i ++) {
-//		while(data.hasNextLine()) {
+		
+//		int toDelete = 0;
+//		for(int i = 0; i <10000; i ++) {
+		while(data.hasNextLine()) {
 			line = data.nextLine();
 			storage4Data += line;
 			storage4File.add(line);
+//			if(line.contains(" certainly ")) {
+//				toDelete +=1;
+//			}
 //			System.out.println(line);
 //			Populating the temp stroage until the </doc> tag gets hit
 			if(line.contains("</DOC>")) {
-
+				
 //				buildIndex(storage4Data);
 				ArrayList<String> tokens = extractTokens(storage4Data);
-				
 				tokenIdLexicon data4tokensLexicon = convertTokens2Ids(tokens, term2IdLexicon, id2TermLexicon);
 				HashMap <String,Integer> term2IdTemp = data4tokensLexicon.getTerm2IdLexicon();
 				
@@ -106,9 +110,9 @@ public class IndexEngine {
 //				ArrayList<String> tokens = extractTokens(storage4Data);
 //				grabs the current file, gets the id, docno, metadata
 //				and puts them into its hashmaps and makes a file
-//				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
-//				doc2Id.put(getDocNo(storage4Data),internalId);
-//				makeFile(storage4File, internalId, storage4Data, localPathProcess);
+				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
+				doc2Id.put(getDocNo(storage4Data),internalId);
+				makeFile(storage4File, internalId, storage4Data, localPathProcess);
 				
 				//======================= Get rid of the tokens arraylist ======= Copy what is done in class =---------------------
 				
@@ -121,13 +125,15 @@ public class IndexEngine {
 			}
 			
 		}
+		
 		id2TermLexicon = reverseHashMap(term2IdLexicon);
 		
 		saveHashMap2File(doc2Id, id2MetaData, localPathProcess);
 		saveInvertedIndexLexicon(invertedIndex, id2TermLexicon, term2IdLexicon);
 
-		
+//		System.out.println(toDelete + "check");
 		buffered.close();
+		
 	}
 	public static HashMap<Integer,String> reverseHashMap(HashMap<String,Integer> map) {
 	    HashMap<Integer, String> rev = new HashMap<>();
@@ -138,17 +144,20 @@ public class IndexEngine {
 	public static void saveInvertedIndexLexicon(HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex, 
 		HashMap <Integer, String> id2TermLexicon, 
 		HashMap <String,Integer> term2IdLexicon) throws IOException, ClassNotFoundException {
-		
+		File directory = new File("index");
+	    if (! directory.exists()){
+	        directory.mkdir();
+	    }
 //		Writing inverted index
-		FileOutputStream file = new FileOutputStream(new File("invertedIndex.txt"));
+		FileOutputStream file = new FileOutputStream(new File("index/invertedIndex.txt"));
 		ObjectOutputStream toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(invertedIndex);
 //		Writing id 2 term lexicon
-		file = new FileOutputStream(new File("id2TermLexicon.txt"));
+		file = new FileOutputStream(new File("index/id2TermLexicon.txt"));
 		toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(id2TermLexicon);
 //		Writing term 2 id lexicon
-		file = new FileOutputStream(new File("term2IdLexicon.txt"));
+		file = new FileOutputStream(new File("index/term2IdLexicon.txt"));
 		toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(term2IdLexicon);
 		
@@ -156,16 +165,19 @@ public class IndexEngine {
 		toWrite.close();
 		
 //		Reading inverted Index
-		FileInputStream fileRead = new FileInputStream(new File("invertedIndex.txt"));
+		FileInputStream fileRead = new FileInputStream(new File("index/invertedIndex.txt"));
 		ObjectInputStream toRead = new ObjectInputStream(fileRead);
+		@SuppressWarnings("unchecked")
 		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndexRead  = (HashMap<Integer, ArrayList<DocIDCountPair>>) toRead.readObject();
 //		Reading term 2 id Lexicon
-		fileRead = new FileInputStream(new File("term2IdLexicon.txt"));
+		fileRead = new FileInputStream(new File("index/term2IdLexicon.txt"));
 		toRead = new ObjectInputStream(fileRead);
+		@SuppressWarnings("unchecked")
 		HashMap <String, Integer> term2IdLexiconRead =  (HashMap<String, Integer>) toRead.readObject();
 //		Reading id 2 term lexicon
-		fileRead = new FileInputStream(new File("id2TermLexicon.txt"));
+		fileRead = new FileInputStream(new File("index/id2TermLexicon.txt"));
 		toRead = new ObjectInputStream(fileRead);
+		@SuppressWarnings("unchecked")
 		HashMap <Integer, String> id2TermLexiconRead =  (HashMap<Integer, String>) toRead.readObject();
 		
 		
@@ -174,25 +186,16 @@ public class IndexEngine {
 			System.out.println("Term Id: " + i);
 			System.out.println("Term Name: " + id2TermLexiconRead.get(i));
 			for(DocIDCountPair j: temp) {
-				System.out.println("Word is: " + id2TermLexiconRead.get(j.getDocID()));
-				System.out.println(j.getDocID());
-				System.out.println(j.getCount());
+				System.out.println("DocId is: " + j.getDocID());
+				System.out.println("Doc Count is: " + j.getCount());
 				System.out.println("---");
-				
 			}
 			System.out.println("---End of Temp---");
-			
 		}
 //		for(String i : term2IdLexiconRead.keySet()) {
 //			System.out.println("key: " + i + " Value: " + term2IdLexiconRead.get(i));
 //		}
-//		
-		
-		
-
-		
 	}
-
 	
 //	converting to tokenId
 	public static tokenIdLexicon convertTokens2Ids(ArrayList<String> tokens, HashMap <String,Integer> term2IdLexicon, HashMap <Integer, String> id2TermLexicon) {
@@ -230,20 +233,23 @@ public class IndexEngine {
 	public static HashMap<Integer, ArrayList<DocIDCountPair>> add2Posting(HashMap<Integer, Integer> wordCount, int docId, HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex) {
 		
 		for (int termId: wordCount.keySet()) {
+//			System.out.println(termId);
 			ArrayList<DocIDCountPair> postings = new ArrayList<>();
 			int count = wordCount.get(termId);
 			if (invertedIndex.containsKey(termId)) {
 				postings = invertedIndex.get(termId);
-				DocIDCountPair temp = new DocIDCountPair(docId, count);
-				postings.add(temp);
+				
 			} else {
 				postings = new ArrayList<DocIDCountPair>();
-				DocIDCountPair temp = new DocIDCountPair(docId, count);
-				postings.add(temp);
+				invertedIndex.put(termId, postings);
+				
 			}
-//			invertedIndex.put(termId, postings); 
+//			System.out.println("termId: " + termId + " docId: " + docId + " Count: " + count);
+			DocIDCountPair temp = new DocIDCountPair(docId,count);
+			postings.add(temp);
 			invertedIndex.put(termId,postings);
 		}
+//		System.out.println("-----------------------------------------------");
 		return invertedIndex;
 	}
 	
@@ -307,24 +313,14 @@ public class IndexEngine {
         if (m.find()) return true;
         else          return false;
     }
-//	public static void buildIndex(String document) {
-////		==================Place holder ==============================
-//		HashMap <String,Integer> term2IdLexicon = new HashMap<>(); 
-//		HashMap <Integer, String> id2TermLexicon = new HashMap<>();
-//		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex = new HashMap<>();
-//		int docId = 0;
-////		=============================================================
-//		
-//		ArrayList<String> tokens = extractTokens(document);
-//		ArrayList<Integer> tokenIds = convertTokens2Ids(tokens, term2IdLexicon, id2TermLexicon);
-//		HashMap<Integer, Integer> wordCounts = countWords(tokenIds);
-//		add2Posting(wordCounts, docId, invertedIndex);
-//	}
-//	Saving the hashmaps to file
+
 	public static void saveHashMap2File(HashMap<String, Integer> doc2Id,HashMap<Integer, metaData> id2MetaData, String localPathProcess ) throws FileNotFoundException, UnsupportedEncodingException {
-		
-		PrintWriter writerA = new PrintWriter(localPathProcess + "/doc2Id.txt", "UTF-8");
-		PrintWriter writerB = new PrintWriter(localPathProcess + "/id2MetaData.txt", "UTF-8");
+		File directory = new File("index");
+	    if (! directory.exists()){
+	        directory.mkdir();
+	    }
+		PrintWriter writerA = new PrintWriter(localPathProcess + "/index/doc2Id.txt", "UTF-8");
+		PrintWriter writerB = new PrintWriter(localPathProcess + "/index/id2MetaData.txt", "UTF-8");
 		
 		for (Map.Entry<String, Integer> entry : doc2Id.entrySet()) {
 			String key = (String) entry.getKey();
