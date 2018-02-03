@@ -24,14 +24,58 @@ public class BooleanAnd {
 		String localPathQueries = "C:/Users/Rui/eclipse-workspace/541-Hw1/topics.txt";
 //		the path of where you would store your output file
 		String localPathOutputFileToStore = "C:/Users/Rui/eclipse-workspace/541-Hw1";
+		HashMap <Integer, metaData> id2MetaData = new HashMap<>();
+		HashMap <String,Integer> term2IdLexicon = new HashMap<>();
+		HashMap <Integer, String> id2TermLexicon = new HashMap<>();
+		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndexRead = new HashMap<Integer, ArrayList<DocIDCountPair>>();
+		ArrayList<Queries> rawQueries = readQueries(localPathQueries);
+		ArrayList<ArrayList<String>> queries = new ArrayList<>();
 		
-		ArrayList<Queries> queries = readQueries(localPathQueries);
+		for( Queries i : rawQueries) {
+			String words = i.getTitle();
+			queries.add(extractTokens(words));
+		}
+		
+		
+		
+//		ResultList has all the docId's 
+		ArrayList<Integer> resultList =  sharkAndAttack(queries, invertedIndexRead, term2IdLexicon);
 		
 	}
 	
-	public static void sharkAndAttack() {
+//	@SuppressWarnings("unlikely-arg-type")
+	public static ArrayList<Integer> sharkAndAttack(ArrayList<ArrayList<String>> queries, HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndexRead, HashMap <String,Integer> term2IdLexicon ) {
 //		Key: doc id Value: value of count in postings 
 		HashMap<Integer, Integer> docCount = new HashMap<>();
+		ArrayList<DocIDCountPair> postings = new ArrayList<>();
+		ArrayList<Integer> resultList = new ArrayList<>();
+		for( ArrayList<String> perQuery : queries) {
+//			Queries is incomplete
+			for( String term: perQuery) {
+				
+				int termId = term2IdLexicon.get(term);
+				postings = invertedIndexRead.get(termId);
+				
+				for( DocIDCountPair j : postings) {
+					int docId = j.getDocID();
+					
+					if(docCount.containsKey(docId)) {
+						docCount.put(docId, docCount.get(docId) + 1);
+					} else {
+						docCount.put(docId, 1);
+					}
+				}
+			}
+			for( int docId: docCount.keySet()) {
+				if( docCount.get(docId) == perQuery.size()) {
+					resultList.add(docId);
+				}
+			}
+		}
+
+		
+		
+		return resultList;
 		
 	}
 	public static ArrayList<Queries> readQueries(String localPathQueries) throws FileNotFoundException{
@@ -57,34 +101,8 @@ public class BooleanAnd {
 	}
 //	Tokenize
 	public static ArrayList<String> extractTokens(String storage) {
-		String rawText = "";
-		int startPosition = 0;
-		int endPosition = 0;
-		if(storage.contains("</TEXT>")) {
-			startPosition = storage.indexOf("<TEXT>") + "<TEXT>".length();
-			endPosition = storage.indexOf("</TEXT>", startPosition);
-			rawText = storage.substring(startPosition, endPosition).trim();
-		
-		}
-		
-		if(storage.contains("</HEADLINE>")) {
-			startPosition = storage.indexOf("<HEADLINE>") + "<HEADLINE>".length();
-			endPosition = storage.indexOf("</HEADLINE>", startPosition);
-			rawText += storage.substring(startPosition, endPosition).trim();
-		}
-		if(storage.contains("</GRAPHIC>")) {
-			startPosition = storage.indexOf("<GRAPHIC>") + "<GRAPHIC>".length();
-			endPosition = storage.indexOf("</GRAPHIC>", startPosition);
-			rawText += storage.substring(startPosition, endPosition).trim();
-		}
-		if(rawText.contains("</P>")) {
-			rawText = rawText.replaceAll("<P>", "");
-			rawText = rawText.replaceAll("</P>", "");
-		}
 		//tokenize
-		ArrayList<String> tokens = tokenize(rawText);
-		
-		
+		ArrayList<String> tokens = tokenize(storage);
 		return tokens;
 		
 	}
@@ -103,7 +121,6 @@ public class BooleanAnd {
 				}
 				start = i+1;
 			}
-			
 		}
 		if(start!=i) {
 			tokens.add(text.substring(start, i-start));
@@ -115,5 +132,4 @@ public class BooleanAnd {
         if (m.find()) return true;
         else          return false;
     }
-
 }

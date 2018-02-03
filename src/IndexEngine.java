@@ -112,7 +112,7 @@ public class IndexEngine {
 //				and puts them into its hashmaps and makes a file
 				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
 				doc2Id.put(getDocNo(storage4Data),internalId);
-				makeFile(storage4File, internalId, storage4Data, localPathProcess);
+//				makeFile(storage4File, internalId, storage4Data, localPathProcess);
 				
 				//======================= Get rid of the tokens arraylist ======= Copy what is done in class =---------------------
 				
@@ -120,6 +120,7 @@ public class IndexEngine {
 //				Clears the temp story for the next file
 				storage4Data = "";
 				storage4File = new ArrayList<String>();
+				System.out.println(internalId);
 				internalId +=1;
 //				System.out.println("Creating file with internal id: " + internalId + " and adding it to two hashmaps ");
 			}
