@@ -75,8 +75,8 @@ public class IndexEngine {
 		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex = new HashMap<>();
 		
 //		int toDelete = 0;
-//		for(int i = 0; i <10000; i ++) {
-		while(data.hasNextLine()) {
+		for(int i = 0; i <100000; i ++) {
+//		while(data.hasNextLine()) {
 			line = data.nextLine();
 			storage4Data += line;
 			storage4File.add(line);
@@ -150,15 +150,18 @@ public class IndexEngine {
 	        directory.mkdir();
 	    }
 //		Writing inverted index
-		FileOutputStream file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/invertedIndex.txt"));
+	    FileOutputStream file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/test/invertedIndex.txt"));
+//		FileOutputStream file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/invertedIndex.txt"));
 		ObjectOutputStream toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(invertedIndex);
 //		Writing id 2 term lexicon
-		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/id2TermLexicon.txt"));
+//		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/id2TermLexicon.txt"));
+		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/test/id2TermLexicon.txt"));
 		toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(id2TermLexicon);
 //		Writing term 2 id lexicon
-		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/term2IdLexicon.txt"));
+		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/test/term2IdLexicon.txt"));
+//		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/term2IdLexicon.txt"));
 		toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(term2IdLexicon);
 		
@@ -166,17 +169,20 @@ public class IndexEngine {
 		toWrite.close();
 		
 //		Reading inverted Index
-		FileInputStream fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/invertedIndex.txt"));
+//		FileInputStream fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/invertedIndex.txt"));
+		FileInputStream fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/test/invertedIndex.txt"));
 		ObjectInputStream toRead = new ObjectInputStream(fileRead);
 		@SuppressWarnings("unchecked")
 		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndexRead  = (HashMap<Integer, ArrayList<DocIDCountPair>>) toRead.readObject();
 //		Reading term 2 id Lexicon
-		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/term2IdLexicon.txt"));
+//		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/term2IdLexicon.txt"));
+		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/test/term2IdLexicon.txt"));
 		toRead = new ObjectInputStream(fileRead);
 		@SuppressWarnings("unchecked")
 		HashMap <String, Integer> term2IdLexiconRead =  (HashMap<String, Integer>) toRead.readObject();
 //		Reading id 2 term lexicon
-		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/id2TermLexicon.txt"));
+//		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/id2TermLexicon.txt"));
+		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/test/id2TermLexicon.txt"));
 		toRead = new ObjectInputStream(fileRead);
 		@SuppressWarnings("unchecked")
 		HashMap <Integer, String> id2TermLexiconRead =  (HashMap<Integer, String>) toRead.readObject();
@@ -320,8 +326,10 @@ public class IndexEngine {
 	    if (! directory.exists()){
 	        directory.mkdir();
 	    }
-		PrintWriter writerA = new PrintWriter(localPathProcess + "/index/doc2Id.txt", "UTF-8");
-		PrintWriter writerB = new PrintWriter(localPathProcess + "/index/id2MetaData.txt", "UTF-8");
+	    PrintWriter writerA = new PrintWriter(localPathProcess + "/test/doc2Id.txt", "UTF-8");
+//		PrintWriter writerA = new PrintWriter(localPathProcess + "/index/doc2Id.txt", "UTF-8");
+		PrintWriter writerB = new PrintWriter(localPathProcess + "/test/id2MetaData.txt", "UTF-8");
+//		PrintWriter writerB = new PrintWriter(localPathProcess + "/index/id2MetaData.txt", "UTF-8");
 		
 		for (Map.Entry<String, Integer> entry : doc2Id.entrySet()) {
 			String key = (String) entry.getKey();

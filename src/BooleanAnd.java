@@ -28,7 +28,7 @@ public class BooleanAnd {
 ////		the path of where you would store your output file
 //		String localPathOutputFileToStore = args[2];
 //		Reading inverted Index
-		FileInputStream fileRead = new FileInputStream(new File("index/invertedIndex.txt"));
+		FileInputStream fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/invertedIndex.txt"));
 		ObjectInputStream toRead = new ObjectInputStream(fileRead);
 		@SuppressWarnings("unchecked")
 		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndexRead  = (HashMap<Integer, ArrayList<DocIDCountPair>>) toRead.readObject();
@@ -37,7 +37,7 @@ public class BooleanAnd {
 		toRead = new ObjectInputStream(fileRead);
 		@SuppressWarnings("unchecked")
 		HashMap <String, Integer> term2IdLexicon =  (HashMap<String, Integer>) toRead.readObject();
-//		System.out.println("Read the index");
+		System.out.println("Read the index");
 //		Reading the metaData
 
 		
@@ -59,30 +59,10 @@ public class BooleanAnd {
 //		topicid to docId
 		LinkedHashMap<String, Integer> resultList = sharkAndAttack(queries, invertedIndexRead, term2IdLexicon, rawQueries);
 		
-//		for ( String i: resultList.keySet()) {
-//			System.out.println(i.substring(0,3));
-//			System.out.println(resultList.get(i));
-//		}
 		
 		ArrayList<String> result = formalizeResults(resultList, id2MetaData);
 		writeResults(result);
 		
-
-		
-	}
-	
-	public static HashMap<Integer, metaData> generateid2MetaDataHash() throws FileNotFoundException {
-		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
-		Scanner id2MetaDatatxt = new Scanner(new FileReader("C:/Users/Rui/eclipse-workspace/541-Hw1/index/id2MetaData.txt"));
-		while(id2MetaDatatxt.hasNextLine()) {
-			String nextLine = id2MetaDatatxt.nextLine();
-			String[] nextLineArr = nextLine.split("\\|");
-			int key = Integer.parseInt(nextLineArr[0]);
-			String[] data = nextLineArr[1].split("\\{}");
-			metaData meta = new metaData(Integer.parseInt(data[0]), data[1], data[2],data[3], data[4]);
-			id2MetaData.put(key, meta);
-		}
-		return id2MetaData;
 	}
 	public static void writeResults(ArrayList<String> result) throws FileNotFoundException, UnsupportedEncodingException {
 		PrintWriter writerA = new PrintWriter("C:/Users/Rui/eclipse-workspace/541-Hw1/index/hw2-results-Zhang.txt", "UTF-8");
@@ -90,22 +70,29 @@ public class BooleanAnd {
 		for(String line: result) {
 			writerA.println(line);
 		}
-		
-		
 		writerA.close();
 	}
 	
 	public static ArrayList<String> formalizeResults(LinkedHashMap<String, Integer> resultList , HashMap<Integer, metaData> id2MetaData) {
 		ArrayList<String> resultArray = new ArrayList<>();
-		String topicId = "";
+		String topicId = "    ";
 		String q0 = "q0";
 		String docNo = "";
 		int rank = 0, score = 0, docId = 0;
 		String runTag = "r255zhanAND";
 		int totalRetrieved = resultList.size();
 //		docId = 0;
+		
+		
 		for( String key : resultList.keySet()) {
+			
+			if (!topicId.substring(0,3).equals(key.substring(0,3))) {
+				System.out.println(topicId.substring(0,3) + " " + key.substring(0,3));
+				rank = 0;
+				
+			}
 			topicId = key;
+			
 			docId = resultList.get(key);
 			metaData currentTemp = id2MetaData.get(docId);
 //			System.out.println(docId);
@@ -113,13 +100,11 @@ public class BooleanAnd {
 			docNo = currentTemp.getDocNo();
 			score = totalRetrieved - rank;
 			
-			String resultLine = topicId + " " + q0 + " " + docNo + " " + rank + " " + score + " " + runTag;
+			String resultLine = topicId.substring(0,3) + " " + q0 + " " + docNo + " " + rank + " " + score + " " + runTag;
 //			System.out.println(resultLine);
 			resultArray.add(resultLine);
 			rank += 1;
 		}
-		
-		
 		
 		return resultArray;
 	}
@@ -130,8 +115,6 @@ public class BooleanAnd {
 			HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndexRead, 
 			HashMap <String,Integer> term2IdLexicon,
 			ArrayList<Queries> rawQueries ) {
-		
-		
 
 		ArrayList<DocIDCountPair> postings = new ArrayList<>();
 		LinkedHashMap<String, Integer> resultList = new LinkedHashMap<>();
@@ -144,7 +127,7 @@ public class BooleanAnd {
 			for( String term: perQuery) {
 				
 				
-//				if(!term2IdLexicon.containsKey(term)) continue;
+				if(!term2IdLexicon.containsKey(term)) continue;
 				
 				int termId = term2IdLexicon.get(term);
 				postings = invertedIndexRead.get(termId);
@@ -175,15 +158,13 @@ public class BooleanAnd {
 					Queries temp = rawQueries.get(i);
 					System.out.println(docCount.get(docId) + " " + perQuery.size());
 					String topicID = temp.getNum();
-//					resultList.put(topicID + Integer.toString(i) , docId);
-					resultList.put(topicID , docId);
+					resultList.put(topicID + docId , docId);
+//					resultList.put(topicID , docId);
 					System.out.println("topicId: " + topicID + " Docid: " + docId);
 				}
 			}
 			i+=1;
 		}
-
-		
 		
 		return resultList;
 		
@@ -242,4 +223,17 @@ public class BooleanAnd {
         if (m.find()) return true;
         else          return false;
     }
+	public static HashMap<Integer, metaData> generateid2MetaDataHash() throws FileNotFoundException {
+		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
+		Scanner id2MetaDatatxt = new Scanner(new FileReader("C:/Users/Rui/eclipse-workspace/541-Hw1/index/id2MetaData.txt"));
+		while(id2MetaDatatxt.hasNextLine()) {
+			String nextLine = id2MetaDatatxt.nextLine();
+			String[] nextLineArr = nextLine.split("\\|");
+			int key = Integer.parseInt(nextLineArr[0]);
+			String[] data = nextLineArr[1].split("\\{}");
+			metaData meta = new metaData(Integer.parseInt(data[0]), data[1], data[2],data[3], data[4]);
+			id2MetaData.put(key, meta);
+		}
+		return id2MetaData;
+	}
 }

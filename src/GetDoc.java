@@ -11,18 +11,18 @@ public class GetDoc {
 
 	public static void main(String[] args) throws FileNotFoundException, ParseException {
 		// TODO Auto-generated method stub
-		if(args.length < 3) {
-			System.out.println("You did not input sufficient arguements. This program must accept 3 arguements");
-			System.out.println("First Arguement: a path to the location of the documents and metadata created from the IndexEngine");
-			System.out.println("Second Arguement: either the strings \"id\" or \"docno\" ");
-			System.out.println("Third Arguement: either the internal integer id or the document's docno");
-			System.exit(0);
-		}
+//		if(args.length < 3) {
+//			System.out.println("You did not input sufficient arguements. This program must accept 3 arguements");
+//			System.out.println("First Arguement: a path to the location of the documents and metadata created from the IndexEngine");
+//			System.out.println("Second Arguement: either the strings \"id\" or \"docno\" ");
+//			System.out.println("Third Arguement: either the internal integer id or the document's docno");
+//			System.exit(0);
+//		}
 //		String currentDir = System.getProperty("user.dir");
 //		System.out.println(currentDir);
-		String localPath = args[0];
-		String type = args[1];
-		String DocOrId = args[2];
+		String localPath = "C:/Users/Rui/eclipse-workspace/541-Hw1";
+		String type = "docno";
+		String DocOrId = "LA050590-0114";
 //		The two hashmaps to add
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
 		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
@@ -72,7 +72,7 @@ public class GetDoc {
 //	This method grabs the docno to id txt file, reads the file and populates it
 	public static HashMap<String, Integer> generateDoc2IdHash(String localPath) throws FileNotFoundException {
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
-		Scanner docno2idtxt = new Scanner(new FileReader(localPath + "/doc2Id.txt"));
+		Scanner docno2idtxt = new Scanner(new FileReader(localPath + "/index/doc2Id.txt"));
 		while(docno2idtxt.hasNextLine()) {
 			String nextLine = docno2idtxt.nextLine();
 			String[] nextLineArr = nextLine.split("\\|");
@@ -87,7 +87,7 @@ public class GetDoc {
 //	This method grabs the id to metadata txt file, reads it, and populates the hashmap	
 	public static HashMap<Integer, metaData> generateid2MetaDataHash(String localPath) throws FileNotFoundException {
 		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
-		Scanner id2MetaDatatxt = new Scanner(new FileReader(localPath +"/id2MetaData.txt"));
+		Scanner id2MetaDatatxt = new Scanner(new FileReader(localPath +"/index/id2MetaData.txt"));
 		while(id2MetaDatatxt.hasNextLine()) {
 			String nextLine = id2MetaDatatxt.nextLine();
 			String[] nextLineArr = nextLine.split("\\|");
