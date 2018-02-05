@@ -7,7 +7,6 @@ public class Queries {
 		this.topicNum = topicNum;
 		this.title = title;
 	}
-	
 	public String getNum() {
 		return this.topicNum;
 	}

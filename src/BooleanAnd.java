@@ -39,42 +39,20 @@ public class BooleanAnd {
 		HashMap <String, Integer> term2IdLexicon =  (HashMap<String, Integer>) toRead.readObject();
 		System.out.println("Read the index");
 //		Reading the metaData
-//		System.out.println(invertedIndexRead.size());
-//		System.out.println(term2IdLexicon.size());
-//		
 		HashMap <Integer, metaData> id2MetaData =  generateid2MetaDataHash(localPathIndex);
-		
-//		String localPathQueries = "C:/Users/Rui/eclipse-workspace/541-Hw1/topics.txt";
-//		the path of where you would store your output file
-//		String localPathOutputFileToStore = "C:/Users/Rui/eclipse-workspace/541-Hw1";
-
-		
 		ArrayList<Queries> rawQueries = readQueries(localPathQueries);
 		ArrayList<ArrayList<String>> queries = new ArrayList<>();
-		
 		for( Queries i : rawQueries) {
 			String words = i.getTitle();
-//			System.out.println(words);
 			queries.add(extractTokens(words));
 		}
-		
-		
-		
 //		topicid to docId
 		LinkedHashMap<String, Integer> resultList = sharkAndAttack(queries, invertedIndexRead, term2IdLexicon, rawQueries);
-		
-//		for(String i: resultList.keySet()) {
-//			System.out.println(i + " " + resultList.get(i));
-//			
-//		}
-		
 		ArrayList<String> result = formalizeResults(resultList, id2MetaData);
 		writeResults(result, localPathOutputFileToStore);
-		
 	}
 	public static void writeResults(ArrayList<String> result, String localPathOutputFileToStore) throws FileNotFoundException, UnsupportedEncodingException {
 		PrintWriter writerA = new PrintWriter(localPathOutputFileToStore, "UTF-8");
-		
 		for(String line: result) {
 			writerA.println(line);
 		}
@@ -88,9 +66,7 @@ public class BooleanAnd {
 		String docNo = "";
 		int rank = 1, score = 0, docId = 0, scoreCount=1;
 		String runTag = "r255zhanAND";
-		
 		ArrayList<Integer> scoreKeeper = getScores(resultList);
-		
 		for( String key : resultList.keySet()) {
 			if (!topicId.substring(0,3).equals(key.substring(0,3))) {
 				rank = 1;
@@ -106,7 +82,6 @@ public class BooleanAnd {
 			resultArray.add(resultLine);
 			rank += 1;
 		}
-		
 		return resultArray;
 	}
 //	resultList = Topic--> docId
@@ -114,7 +89,6 @@ public class BooleanAnd {
 		ArrayList<Integer> resultScores = new ArrayList<>();
 		String tempTopicId = "    ";
 		int numItemRetrieved = 1;
-		
 		for(String topicId : resultList.keySet()) {
 			if( !tempTopicId.substring(0,3).equals(topicId.substring(0,3))) {
 				resultScores.add(numItemRetrieved);
@@ -122,15 +96,8 @@ public class BooleanAnd {
 			}
 			numItemRetrieved +=1;
 			tempTopicId = topicId;
-			
-		
 		}
 		resultScores.add(numItemRetrieved);
-		
-//		for(int i : resultScores) {
-//			System.out.println(i);
-//		}
-//		
 		return resultScores;
 	}
 	
@@ -167,11 +134,8 @@ public class BooleanAnd {
 			for( int docId: docCount.keySet()) {
 				if( docCount.get(docId) == perQuery.size()) {
 					Queries temp = rawQueries.get(i);
-//					System.out.println(docCount.get(docId) + " " + perQuery.size());
 					String topicID = temp.getNum();
 					resultList.put(topicID + docId , docId);
-//					resultList.put(topicID , docId);
-//					System.out.println("topicId: " + topicID + " Docid: " + docId);
 				}
 			}
 			i+=1;
@@ -185,7 +149,6 @@ public class BooleanAnd {
 		Reader decoder = new InputStreamReader(fileStream);
 		BufferedReader buffered = new BufferedReader(decoder);
 		Scanner data = new Scanner(buffered);
-		
 		ArrayList<String> tempQueries = new ArrayList<String>();
 		while(data.hasNextLine()) {
 			tempQueries.add(data.nextLine());
@@ -197,21 +160,18 @@ public class BooleanAnd {
 			queryArr.add(tempData);
 		}
 		return queryArr; 
-		
 	}
 //	Tokenize
 	public static ArrayList<String> extractTokens(String storage) {
 		//tokenize
 		ArrayList<String> tokens = tokenize(storage);
 		return tokens;
-		
 	}
 	public static ArrayList<String> tokenize(String text) {
 		text = text.toLowerCase();
 		ArrayList<String> tokens = new ArrayList<String>();
 		int start = 0;
 		int i =0;
-		
 		for (i=0;i<text.length();++i) {
 			String c = text.substring(i, i+1);
 			if(  checkForCharAndDigits(c) ) {

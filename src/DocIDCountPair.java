@@ -1,4 +1,4 @@
-
+//Doc ID Count Class
 public class DocIDCountPair implements java.io.Serializable {
 	private int docID = 0;
 	private int count = 0;
@@ -8,7 +8,6 @@ public class DocIDCountPair implements java.io.Serializable {
 		this.docID = docID;
 		this.count = count;
 	}
-	
 	public int getDocID() {
 		return this.docID;
 	}

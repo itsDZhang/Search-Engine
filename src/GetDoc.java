@@ -22,7 +22,7 @@ public class GetDoc {
 //		System.out.println(currentDir);
 		String localPath = "C:/Users/Rui/eclipse-workspace/541-Hw1";
 		String type = "docno";
-		String DocOrId = "LA011789-0080";
+		String DocOrId = "LA111389-0067";
 //		The two hashmaps to add
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
 		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();

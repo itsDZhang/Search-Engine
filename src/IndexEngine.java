@@ -32,20 +32,16 @@ public class IndexEngine {
 		
 //		String currentDir = System.getProperty("user.dir");
 //		System.out.println(currentDir);
-		
-//		if(args.length < 2) {
-//			System.out.println("You did not input sufficient arguements. This program must accept two arguements");
-//			System.out.println("First Arguement: a path to the latimes.gz file");
-//			System.out.println("Second Arguement: a path to a directory where the documents and metadata are being stored");
-//			System.exit(0);
-//		}
+		if(args.length < 2) {
+			System.out.println("You did not input sufficient arguements. This program must accept two arguements");
+			System.out.println("First Arguement: a path to the latimes.gz file");
+			System.out.println("Second Arguement: a path to a directory where the documents and metadata are being stored");
+			System.exit(0);
+		}
 		String localPathGzip = args[0];
 		String localPathProcess = args[1];
-		
 //		String localPathProcess = "C:/Users/Rui/eclipse-workspace/541-Hw1";
 //		String localPathGzip = "C:/Users/Rui/eclipse-workspace/541-Hw1/latimes.gz";
-		
-		
 //		File results = new File(localPathProcess + "/filesToBeStored");
 //		if ( results.exists()) {
 //			System.out.println("The directory "+ "filesToBeStored" + " already exists.");
@@ -56,14 +52,14 @@ public class IndexEngine {
 	
 	public static void readAndProcess(String localPathGzip, String localPathProcess) throws IOException, ParseException, ClassNotFoundException{
 //		Reads the zip file
-//		File latimesFile = new File(localPathGzip);
-//		InputStream fileStream = new FileInputStream(latimesFile);
-//		InputStream gzipStream = new GZIPInputStream(fileStream);
-//		Reader decoder = new InputStreamReader(gzipStream);
-//		BufferedReader buffered = new BufferedReader(decoder);
-//		Scanner data = new Scanner(buffered);
+		File latimesFile = new File(localPathGzip);
+		InputStream fileStream = new FileInputStream(latimesFile);
+		InputStream gzipStream = new GZIPInputStream(fileStream);
+		Reader decoder = new InputStreamReader(gzipStream);
+		BufferedReader buffered = new BufferedReader(decoder);
+		Scanner data = new Scanner(buffered);
 		
-		Scanner data = new Scanner(new FileReader(localPathGzip));
+//		Scanner data = new Scanner(new FileReader(localPathGzip));
 		//initializes the first two hashmaps
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
 		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
@@ -83,14 +79,9 @@ public class IndexEngine {
 			line = data.nextLine();
 			storage4Data += line;
 			storage4File.add(line);
-//			if(line.contains(" certainly ")) {
-//				toDelete +=1;
-//			}
 //			System.out.println(line);
 //			Populating the temp stroage until the </doc> tag gets hit
 			if(line.contains("</DOC>")) {
-				
-//				buildIndex(storage4Data);
 				ArrayList<String> tokens = extractTokens(storage4Data);
 				tokenIdLexicon data4tokensLexicon = convertTokens2Ids(tokens, term2IdLexicon, id2TermLexicon);
 				HashMap <String,Integer> term2IdTemp = data4tokensLexicon.getTerm2IdLexicon();
@@ -113,10 +104,6 @@ public class IndexEngine {
 				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
 				doc2Id.put(getDocNo(storage4Data),internalId);
 				makeFile(storage4File, internalId, storage4Data, localPathProcess);
-				
-				//======================= Get rid of the tokens arraylist ======= Copy what is done in class =---------------------
-				
-				
 //				Clears the temp story for the next file
 				storage4Data = "";
 				storage4File = new ArrayList<String>();
@@ -126,10 +113,9 @@ public class IndexEngine {
 		}
 		
 		id2TermLexicon = reverseHashMap(term2IdLexicon);
-		
 		saveHashMap2File(doc2Id, id2MetaData, localPathProcess);
-		saveInvertedIndexLexicon(invertedIndex, id2TermLexicon, term2IdLexicon);
-//		buffered.close();
+		saveInvertedIndexLexicon(invertedIndex, id2TermLexicon, term2IdLexicon, localPathProcess);
+		buffered.close();
 		
 	}
 	public static HashMap<Integer,String> reverseHashMap(HashMap<String,Integer> map) {
@@ -140,26 +126,24 @@ public class IndexEngine {
 	}
 	public static void saveInvertedIndexLexicon(HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex, 
 		HashMap <Integer, String> id2TermLexicon, 
-		HashMap <String,Integer> term2IdLexicon) throws IOException, ClassNotFoundException {
+		HashMap <String,Integer> term2IdLexicon, String localPathProcess) throws IOException, ClassNotFoundException {
 		File directory = new File("index");
 	    if (! directory.exists()){
 	        directory.mkdir();
 	    }
-	    
-	    
 //		Writing inverted index
-	    FileOutputStream file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/invertedIndex.txt"));
-//		FileOutputStream file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/invertedIndex.txt"));
+//	    FileOutputStream file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/invertedIndex.txt"));
+		FileOutputStream file = new FileOutputStream(new File(localPathProcess + "/index/invertedIndex.txt"));
 		ObjectOutputStream toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(invertedIndex);
 //		Writing id 2 term lexicon
-//		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/id2TermLexicon.txt"));
-		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/id2TermLexicon.txt"));
+		file = new FileOutputStream(new File(localPathProcess + "/index/id2TermLexicon.txt"));
+//		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/id2TermLexicon.txt"));
 		toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(id2TermLexicon);
 //		Writing term 2 id lexicon
-		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/term2IdLexicon.txt"));
-//		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/term2IdLexicon.txt"));
+//		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/term2IdLexicon.txt"));
+		file = new FileOutputStream(new File(localPathProcess + "/index/term2IdLexicon.txt"));
 		toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(term2IdLexicon);
 		
@@ -168,24 +152,22 @@ public class IndexEngine {
 		
 //		Reading inverted Index
 //		FileInputStream fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/invertedIndex.txt"));
-		FileInputStream fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/invertedIndex.txt"));
-		ObjectInputStream toRead = new ObjectInputStream(fileRead);
-		@SuppressWarnings("unchecked")
-		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndexRead  = (HashMap<Integer, ArrayList<DocIDCountPair>>) toRead.readObject();
-//		Reading term 2 id Lexicon
-//		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/term2IdLexicon.txt"));
-		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/term2IdLexicon.txt"));
-		toRead = new ObjectInputStream(fileRead);
-		@SuppressWarnings("unchecked")
-		HashMap <String, Integer> term2IdLexiconRead =  (HashMap<String, Integer>) toRead.readObject();
-//		Reading id 2 term lexicon
-//		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/id2TermLexicon.txt"));
-		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/id2TermLexicon.txt"));
-		toRead = new ObjectInputStream(fileRead);
-		@SuppressWarnings("unchecked")
-		HashMap <Integer, String> id2TermLexiconRead =  (HashMap<Integer, String>) toRead.readObject();
-		
-		
+//		FileInputStream fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/invertedIndex.txt"));
+//		ObjectInputStream toRead = new ObjectInputStream(fileRead);
+//		@SuppressWarnings("unchecked")
+//		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndexRead  = (HashMap<Integer, ArrayList<DocIDCountPair>>) toRead.readObject();
+////		Reading term 2 id Lexicon
+////		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/term2IdLexicon.txt"));
+//		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/term2IdLexicon.txt"));
+//		toRead = new ObjectInputStream(fileRead);
+//		@SuppressWarnings("unchecked")
+//		HashMap <String, Integer> term2IdLexiconRead =  (HashMap<String, Integer>) toRead.readObject();
+////		Reading id 2 term lexicon
+////		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/id2TermLexicon.txt"));
+//		fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/id2TermLexicon.txt"));
+//		toRead = new ObjectInputStream(fileRead);
+//		@SuppressWarnings("unchecked")
+//		HashMap <Integer, String> id2TermLexiconRead =  (HashMap<Integer, String>) toRead.readObject();
 //		for(int i : invertedIndexRead.keySet()) {
 //			ArrayList<DocIDCountPair> temp = invertedIndexRead.get(i);
 //			System.out.println("Term Id: " + i);
@@ -201,11 +183,9 @@ public class IndexEngine {
 //			System.out.println("key: " + i + " Value: " + term2IdLexiconRead.get(i));
 //		}
 	}
-	
 //	converting to tokenId
 	public static tokenIdLexicon convertTokens2Ids(ArrayList<String> tokens, HashMap <String,Integer> term2IdLexicon, HashMap <Integer, String> id2TermLexicon) {
 		ArrayList<Integer> tokenIds = new ArrayList<>();
-		
 		for (String i: tokens) {
 			if(term2IdLexicon.containsKey(i)) {
 				tokenIds.add(term2IdLexicon.get(i));
@@ -216,7 +196,6 @@ public class IndexEngine {
 				tokenIds.add(id);
 			}
 		}
-		
 		tokenIdLexicon temp = new tokenIdLexicon(tokenIds, term2IdLexicon, id2TermLexicon);
 		return temp;
 	}
@@ -230,24 +209,19 @@ public class IndexEngine {
 			} else {
 				wordCounts.put(id, 1);
 			}
-			
 		}
 		return wordCounts;
-		
 	}
 	public static HashMap<Integer, ArrayList<DocIDCountPair>> add2Posting(HashMap<Integer, Integer> wordCount, int docId, HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex) {
-		
 		for (int termId: wordCount.keySet()) {
 //			System.out.println(termId);
 			ArrayList<DocIDCountPair> postings = new ArrayList<>();
 			int count = wordCount.get(termId);
 			if (invertedIndex.containsKey(termId)) {
 				postings = invertedIndex.get(termId);
-				
 			} else {
 				postings = new ArrayList<DocIDCountPair>();
 				invertedIndex.put(termId, postings);
-				
 			}
 //			System.out.println("termId: " + termId + " docId: " + docId + " Count: " + count);
 			DocIDCountPair temp = new DocIDCountPair(docId,count);
@@ -285,10 +259,7 @@ public class IndexEngine {
 		}
 		//tokenize
 		ArrayList<String> tokens = tokenize(rawText);
-		
-		
 		return tokens;
-		
 	}
 	//To tokenize
 	public static ArrayList<String> tokenize(String text) {
@@ -306,7 +277,6 @@ public class IndexEngine {
 				}
 				start = i+1;
 			}
-			
 		}
 		if(start!=i) {
 			tokens.add(text.substring(start, i));
@@ -324,10 +294,10 @@ public class IndexEngine {
 	    if (! directory.exists()){
 	        directory.mkdir();
 	    }
-	    PrintWriter writerA = new PrintWriter(localPathProcess + "/testCollection/doc2Id.txt", "UTF-8");
-//		PrintWriter writerA = new PrintWriter(localPathProcess + "/index/doc2Id.txt", "UTF-8");
-		PrintWriter writerB = new PrintWriter(localPathProcess + "/testCollection/id2MetaData.txt", "UTF-8");
-//		PrintWriter writerB = new PrintWriter(localPathProcess + "/index/id2MetaData.txt", "UTF-8");
+//	    PrintWriter writerA = new PrintWriter(localPathProcess + "/testCollection/doc2Id.txt", "UTF-8");
+		PrintWriter writerA = new PrintWriter(localPathProcess + "/index/doc2Id.txt", "UTF-8");
+//		PrintWriter writerB = new PrintWriter(localPathProcess + "/testCollection/id2MetaData.txt", "UTF-8");
+		PrintWriter writerB = new PrintWriter(localPathProcess + "/index/id2MetaData.txt", "UTF-8");
 		
 		for (Map.Entry<String, Integer> entry : doc2Id.entrySet()) {
 			String key = (String) entry.getKey();
@@ -357,22 +327,21 @@ public class IndexEngine {
 					throws FileNotFoundException, UnsupportedEncodingException, ParseException {
 		String id = Integer.toString(internalId);
 		String date = getDateAsNum(storage4Data);
-//		File results = new File(localPathProcess + "/filesToBeStored");
-		File results = new File(localPathProcess + "/testCollection");
+		File results = new File(localPathProcess + "/filesToBeStored");
+//		File results = new File(localPathProcess + "/testCollection");
 		if(! results.exists()) {
 			results.mkdir();
 		}
-//		File directory = new File(localPathProcess + "/filesToBeStored/" + date);
-		File directory = new File(localPathProcess + "/testCollection/" + date);
+		File directory = new File(localPathProcess + "/filesToBeStored/" + date);
+//		File directory = new File(localPathProcess + "/testCollection/" + date);
 	    if (! directory.exists()){
 	        directory.mkdir();
 	    }
-		PrintWriter writer = new PrintWriter(localPathProcess +"/testCollection/" + date + "/" + id + ".txt", "UTF-8");
+		PrintWriter writer = new PrintWriter(localPathProcess +"/filesToBeStored/" + date + "/" + id + ".txt", "UTF-8");
 		for (Iterator<String> i = storage4File.iterator(); i.hasNext();) {
 		    String item = i.next();
 		    writer.println(item);
 		}
-		
 		writer.close();
 	}
 //	Gets the docno
