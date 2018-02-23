@@ -1,9 +1,33 @@
 package Evaluation;
 
+import java.io.*;
+import java.util.*;
+
 public class qRels {
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+	public RelevanceJudgements judgements = new RelevanceJudgements();
+	public qRels(String fullpath) throws Exception {
+		Scanner sr = new Scanner(new FileReader(fullpath));
+		String line;
+		while((line = sr.nextLine()) != null) {
+			String[] fields = line.split("\\s+");
+			
+			if(fields.length !=4) {
+				throw new Exception(" Input should have 4 columns");
+			}
+			String queryID = fields[0];
+			String docID = fields[2];
+			int relevant = Integer.parseInt(fields[3]);
+			judgements.addJudgements(queryID, docID, relevant);
+			
+			
+			
+		}
+		sr.close();
+		
+		
+		
+		
 		
 	}
 
