@@ -70,9 +70,14 @@ public class RelevanceJudgements {
 			 throw new Exception("No relevance judgements for queryID = " + queryID);
 		 }
 	 }
-	 
+//	 Might not work
 	 public ArrayList<String> getQueryIDs(){
-		 return (ArrayList<String>) this.query2reldocnos.keySet();
+		ArrayList<String> keySet = new ArrayList<>();
+			for( String i : this.query2reldocnos.keySet()) {
+				keySet.add(i);
+			}
+			
+		return keySet;
 	 }
 	 
 	 public ArrayList getRelDocnos(String queryID) throws Exception {
