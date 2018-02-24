@@ -8,8 +8,10 @@ public class qRels {
 	public RelevanceJudgements judgements = new RelevanceJudgements();
 	public qRels(String fullpath) throws Exception {
 		Scanner sr = new Scanner(new FileReader(fullpath));
-		String line;
-		while((line = sr.nextLine()) != null) {
+		String line="";
+		while(sr.hasNextLine()) {
+			line = sr.nextLine();
+//			System.out.println(line);
 			String[] fields = line.split("\\s+");
 			
 			if(fields.length !=4) {

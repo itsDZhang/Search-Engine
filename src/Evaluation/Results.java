@@ -1,11 +1,13 @@
 package Evaluation;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class Results {
 //	implements comparable
-	public class Result  {
+	public class Result implements Comparable<Result>  {
 		
 		private String docID = "";
 		private double score = 0;
@@ -28,19 +30,26 @@ public class Results {
 			return this.rank;
 		}
 //		@Override;
-		public int CompareTo(Object obj) {
-			Result rhs = (Result) obj;
+		public int compareTo(Result obj) {
+			Result rhs = obj;
 			Result lhs = this;
-			
-			if( lhs.score == rhs.getScore()) {
-				return -1*lhs.docID.compareTo(rhs.getDocID());
-			} else if ( lhs.score > rhs.getScore()) {
+			if(lhs.score > rhs.getScore()) {
+				return 1;
+			} else if (lhs.score < rhs.getScore()) {
 				return -1;
 			} else {
-				return 1;
+				return -1 * lhs.docID.compareTo(rhs.docID);
 			}
+			
+//			if( lhs.score == rhs.getScore()) {
+//				return -1*lhs.docID.compareTo(rhs.getDocID());
+//			} else if ( lhs.score > rhs.getScore()) {
+//				return -1;
+//			} else {
+//				return 1;
+//			}
 //			int scoreCompare = -1 * Double.compare(lhs.score, rhs.score);
-//			int scoreCompare = -1 * lhs.getScore().CompareTo(rhs.getScore());
+//			int scoreCompare = -1 * lhs.getScore().compareTo(rhs.getScore());
 //			
 ////					lhs.score.CompareTo(rhs.score);
 //			
@@ -94,7 +103,8 @@ public class Results {
 		}
 		ArrayList<Result> results = (ArrayList)this.query2results.get(queryID);
 		if (!  this.query2isSorted.get(queryID)) {
-			results.sort();
+			Collections.sort(results);
+//			results.sort(null);
 			this.query2isSorted.put(queryID, true);
 //			this.query2isSorted.get(queryID) = true;
 		}

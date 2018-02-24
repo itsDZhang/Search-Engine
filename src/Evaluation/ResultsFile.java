@@ -9,12 +9,16 @@ public class ResultsFile {
 	
 	public ResultsFile(String fullpath) throws Exception {
 //		char[] whitespace = {'\t',' '};
+		
+		
 		Scanner sr = new Scanner(new FileReader(fullpath));
 		
 		boolean firstLine = true;
 		String line = "";
 		
-		while((line = sr.nextLine()) != null) {
+		while(sr.hasNextLine()) {
+			line = sr.nextLine();
+			System.out.println(line);
 			String[] fields = line.split("\\s+");
 			if(fields.length != 6) {
 				throw new Exception("input should have 6 columns");
@@ -28,7 +32,8 @@ public class ResultsFile {
 				this.runID = fields[5];
 				firstLine = false;
 			}
-			else if( this.runID != fields[5]) {
+			else if( !this.runID.equals(fields[5])) {
+
 				throw new Exception("mismatching runID in file");
 				
 			}
