@@ -18,7 +18,7 @@ public class ResultsFile {
 		
 		while(sr.hasNextLine()) {
 			line = sr.nextLine();
-			System.out.println(line);
+//			System.out.println(line);
 			String[] fields = line.split("\\s+");
 			if(fields.length != 6) {
 				throw new Exception("input should have 6 columns");
@@ -30,6 +30,7 @@ public class ResultsFile {
 			results.AddResults(queryID, docID, score, rank);
 			if( firstLine) {
 				this.runID = fields[5];
+//				System.out.println("Run ID:" + this.runID);
 				firstLine = false;
 			}
 			else if( !this.runID.equals(fields[5])) {

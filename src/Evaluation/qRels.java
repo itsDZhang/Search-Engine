@@ -20,6 +20,7 @@ public class qRels {
 			String queryID = fields[0];
 			String docID = fields[2];
 			int relevant = Integer.parseInt(fields[3]);
+//			System.out.println("relevant Number:" + relevant);
 			judgements.addJudgements(queryID, docID, relevant);
 			
 			

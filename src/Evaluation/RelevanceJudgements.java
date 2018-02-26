@@ -80,7 +80,7 @@ public class RelevanceJudgements {
 		return keySet;
 	 }
 	 
-	 public ArrayList getRelDocnos(String queryID) throws Exception {
+	 public ArrayList<String> getRelDocnos(String queryID) throws Exception {
 		 if( this.query2reldocnos.containsKey(queryID)) {
 			 return this.query2reldocnos.get(queryID);
 		 } else {

@@ -31,16 +31,24 @@ public class Results {
 		}
 //		@Override;
 		public int compareTo(Result obj) {
-			Result rhs = obj;
-			Result lhs = this;
-			if(lhs.score > rhs.getScore()) {
-				return 1;
-			} else if (lhs.score < rhs.getScore()) {
-				return -1;
-			} else {
-				return -1 * lhs.docID.compareTo(rhs.docID);
-			}
-			
+//			Result rhs = obj;
+//			Result lhs = this;
+//			if(lhs.score > rhs.getScore()) {
+//				return 1;
+//			} else if (lhs.score < rhs.getScore()) {
+//				return -1;
+//			} else {
+//				return -1 * lhs.docID.compareTo(rhs.docID);
+//			}
+//			=========================================================
+			Result rhs = (Result) obj;
+            Result lhs = this;
+            int scoreCompare = -1 * Double.compare(lhs.getScore(), rhs.getScore());
+            if (scoreCompare == 0) {
+                return -1 * lhs.getDocID().compareTo(rhs.getDocID());
+            } else {
+                return scoreCompare;
+            }
 //			if( lhs.score == rhs.getScore()) {
 //				return -1*lhs.docID.compareTo(rhs.getDocID());
 //			} else if ( lhs.score > rhs.getScore()) {
@@ -73,6 +81,7 @@ public class Results {
 		query2isSorted = new HashMap<>();
 	}
 	public void AddResults(String queryID, String docID, double score, int rank) throws Exception {
+//		System.out.println("===");
 		String key = this.GenerateTupleKey(queryID, docID);
 		if( this.tupleKeys.containsKey(key)) {
 			throw new Exception("Cannot have duplicate queryID and docID data points");
@@ -88,9 +97,13 @@ public class Results {
 			this.query2isSorted.put(queryID, false);
 			
 		}
+//		System.out.println("score: " + score);
 		Result result = new Result(docID, score, rank);
 		results.add(result);
 		
+//		added since these hashmaps don't get updated
+		this.query2results.put(queryID, results);
+		this.query2isSorted.put(queryID, false);
 		
 	}
 	public String GenerateTupleKey(String queryID, String docID) {
@@ -104,6 +117,13 @@ public class Results {
 		ArrayList<Result> results = (ArrayList)this.query2results.get(queryID);
 		if (!  this.query2isSorted.get(queryID)) {
 			Collections.sort(results);
+			
+//			for( Result i: results) {
+//				System.out.println(i.getScore());
+//			}
+			
+			
+			
 //			results.sort(null);
 			this.query2isSorted.put(queryID, true);
 //			this.query2isSorted.get(queryID) = true;
