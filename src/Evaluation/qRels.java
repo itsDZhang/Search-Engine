@@ -7,6 +7,8 @@ public class qRels {
 
 	public RelevanceJudgements judgements = new RelevanceJudgements();
 	public qRels(String fullpath) throws Exception {
+		
+		judgements = new RelevanceJudgements();
 		Scanner sr = new Scanner(new FileReader(fullpath));
 		String line="";
 		while(sr.hasNextLine()) {

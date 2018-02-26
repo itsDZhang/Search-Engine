@@ -22,6 +22,9 @@ public class RelevanceJudgements {
 		public String getDocID() {
 			return this.docID;
 		}
+		public int getRelevant() {
+			return this.relevant;
+		}
 //		I removed "Static" from the original code
 		public String generateKey(String queryID, String docID) {
 			return queryID + "-" + docID;
@@ -52,15 +55,45 @@ public class RelevanceJudgements {
 				 tmpRelDocnos = query2reldocnos.get(queryID);
 			 }else {
 				 tmpRelDocnos = new ArrayList<>();
-				 query2reldocnos.put(queryID, tmpRelDocnos);
+				 //commented this out
+//				 query2reldocnos.put(queryID, tmpRelDocnos);
 			 }
 			 if(!tmpRelDocnos.contains(docID)) {
 				 tmpRelDocnos.add(docID);
 			 }
+			 query2reldocnos.put(queryID, tmpRelDocnos);
 			 
 		 }
 		 
 		 
+	 }
+	 public String generateKey(String queryID, String docID) {
+			return queryID + "-" + docID;
+	 }
+	 
+	 public boolean isRelevant(String queryID, String docID) throws Exception {
+		 return getJudgement(queryID, docID, true) != 0;
+	 }
+	 public int isNotRelevant(String queryID, String docID) throws Exception {
+		 return getJudgement(queryID, docID, false);
+	 }
+	 
+	 public int getJudgement(String queryID, String docID, boolean assumeNonRelevant) throws Exception {
+		 if( ! this.query2reldocnos.containsKey(queryID)) {
+			 throw new Exception( "no relevance judgments for queryID = " + queryID ) ;
+		 }
+		 
+		 String key = generateKey(queryID, docID);
+		 
+		 if(!tuples.containsKey(key)) {
+			 if(assumeNonRelevant)
+				 return 0;
+			 else
+				 throw new Exception( "no relevance judgement for queryID and docID" ) ;
+		 } else {
+			 Tuple tuple = (Tuple) tuples.get(key);
+			 return tuple.relevant;
+		 }
 	 }
 	 
 	 public int numRelevant(String queryID) throws Exception {

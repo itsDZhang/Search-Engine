@@ -53,13 +53,17 @@ public class Evaluate {
 			Double counter = 0.0;
 			String docno = "";
 			for( Result result : queryResult) {
+				
 				docno = result.getDocID();
+//				System.out.println(docno);
 				if(reldocnos.contains(docno)) {
 					counter +=1;
 				}
 			}
-			
-			avgScores.add(counter/queryResult.size());
+			System.out.println("count size: " + counter 
+					+ " reldocnos size: " + reldocnos.size() +
+					" queryResult size: " + queryResult.size());
+			avgScores.add(counter/reldocnos.size());
 			
 			
 			
