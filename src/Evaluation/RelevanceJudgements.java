@@ -50,13 +50,14 @@ public class RelevanceJudgements {
 		 this.tuples.put(tuple.getKey(), tuple);
 		 
 		 if(tuple.relevant !=0) {
+			 
 			 ArrayList<String> tmpRelDocnos = null;
 			 if(query2reldocnos.containsKey(queryID)) {
 				 tmpRelDocnos = query2reldocnos.get(queryID);
 			 }else {
 				 tmpRelDocnos = new ArrayList<>();
 				 //commented this out
-//				 query2reldocnos.put(queryID, tmpRelDocnos);
+				 query2reldocnos.put(queryID, tmpRelDocnos);
 			 }
 			 if(!tmpRelDocnos.contains(docID)) {
 				 tmpRelDocnos.add(docID);

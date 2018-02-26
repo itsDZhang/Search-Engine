@@ -119,9 +119,9 @@ public class Results {
 			Collections.sort(results);
 			
 //			for( Result i: results) {
-//				System.out.println(i.getScore());
+//				System.out.println(i.getRank());
 //			}
-			
+//			
 			
 			
 //			results.sort(null);

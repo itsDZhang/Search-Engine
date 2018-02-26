@@ -43,27 +43,37 @@ public class Evaluate {
 		}
 		
 		
-		
-		
+		Collections.sort(topicIds);
+//		https://people.cs.umass.edu/~jpjiang/cs646/03_eval_basics.pdf
 		for(String topic : topicIds) {
 //			Array of each topic # of id, topicnum -- Correct rel ones
 			queryResult = query2Result.get(topic);
 //			Array of rel doc nos -- Testing this
 			reldocnos = topic2RelDocnos.get(topic);
+			Double precision = 0.0;
 			Double counter = 0.0;
+			Double rank = 0.0;
+			Double sum = 0.0;
 			String docno = "";
+			
 			for( Result result : queryResult) {
 				
 				docno = result.getDocID();
 //				System.out.println(docno);
 				if(reldocnos.contains(docno)) {
 					counter +=1;
+					rank = (double) result.getRank();
+					precision = counter/rank;
+					sum += precision;
 				}
 			}
-			System.out.println("count size: " + counter 
-					+ " reldocnos size: " + reldocnos.size() +
-					" queryResult size: " + queryResult.size());
-			avgScores.add(counter/reldocnos.size());
+			System.out.println( "Topic #: " + topic +
+					" |count size: " + counter 
+					+ " |reldocnos size: " + reldocnos.size() +
+					" |queryResult size: " + queryResult.size());
+//			System.out.println("Sum: " + sum);
+			avgScores.add(sum/reldocnos.size());
+//			avgScores.add(sum/counter);
 			
 			
 			
