@@ -44,28 +44,27 @@ public class Evaluate {
 		}
 		Collections.sort(topicIds);
 		double ndcg = 0;
-		double idcg = 0;
-		for( int i =1; i <=1000; i++) {
-			idcg += (1/(Math.log(i+1)/Math.log(2)));
-		}
 		
 		for(String topic : topicIds) {
 			int breaker = 0;
 			double dcg = 0;
+			double idcg = 0;
 			queryResult = query2Result.get(topic);
 			reldocnos = topic2RelDocnos.get(topic);
-			
-			String docno = "";
-			int stop = 1000;
-			if( stop != queryResult.size()) {
-				stop = queryResult.size();
+			for( int i =1; i <=reldocnos.size(); i++) {
+				idcg += (1/(Math.log(i+1)/Math.log(2)));
 			}
-			for(int i=1; i<=stop; i++ ) {
+			String docno = "";
+//			int stop = 1000;
+//			if( stop != queryResult.size()) {
+//				stop = queryResult.size();
+//			}
+			for(int i=1; i<=queryResult.size(); i++ ) {
 				Result result = queryResult.get(i-1);
 //				System.out.println(result.getRank());
 				docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
-					System.out.println(result.getRank());
+//					System.out.println(result.getRank());
 					dcg += (1/(Math.log(result.getRank() + 1)/Math.log(2)));
 					
 				}
@@ -75,26 +74,13 @@ public class Evaluate {
 			
 			ndcg = dcg/idcg;
 			ndcgList.add(ndcg);
-			System.out.println("Topic: "+ topic + " dcg: " + dcg +" idcg: " + idcg);
-			System.out.println("NDCG: "+ ndcg);
+//			System.out.println("Topic: "+ topic + " dcg: " + dcg +" idcg: " + idcg);
+//			System.out.println("NDCG: "+ ndcg);
 			
 		}
 		
 		System.out.println(ndcgList.toString());
-//		for(Result result: queryResult) {
-//		breaker +=1;
-//		docno = result.getDocID();
-//		if(reldocnos.contains(docno)) {
-//			System.out.println(result.getRank());
-//			dcg += (1/(Math.log(result.getRank() + 1)/Math.log(2)));
-//			
-//		}
-//		if(breaker == 1000) {
-//			break;
-//		}
-//		
-//		
-//	}
+
 	}
 	
 	public static void calcNdcg10(String resultFile, String qrels) throws Exception {
@@ -116,16 +102,20 @@ public class Evaluate {
 		}
 		Collections.sort(topicIds);
 		double ndcg = 0;
-		double idcg = 0;
-		for( int i =1; i <=10; i++) {
-			idcg += (1/(Math.log(i+1)/Math.log(2)));
-		}
 		
 		for(String topic : topicIds) {
 			double dcg = 0;
+			double idcg = 0;
+			int checkSize = 10;
 			queryResult = query2Result.get(topic);
 			reldocnos = topic2RelDocnos.get(topic);
+			if(reldocnos.size() <= checkSize) {
+				checkSize = reldocnos.size();
+			}
 			
+			for( int i =1; i <=checkSize; i++) {
+				idcg += (1/(Math.log(i+1)/Math.log(2)));
+			}
 			String docno = "";
 			
 			for(int breaker=1; breaker<=10; breaker++ ) {
@@ -135,16 +125,12 @@ public class Evaluate {
 				if(reldocnos.contains(docno)) {
 //					System.out.println(result.getRank());
 					dcg += (1/(Math.log(result.getRank() + 1)/Math.log(2)));
-					
 				}
 			}
 			ndcg = dcg/idcg;
 			ndcgList.add(ndcg);
 //			System.out.println("Topic: "+ topic + " dcg: " + dcg +" idcg: " + idcg);
 //			System.out.println("NDCG: "+ ndcg);
-			
-			
-			
 		}
 		
 		System.out.println(ndcgList.toString());
