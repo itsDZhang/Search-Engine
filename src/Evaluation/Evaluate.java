@@ -12,17 +12,128 @@ public class Evaluate {
 		String qrels = "C:/Users/Rui/eclipse-workspace/541/hw3Files/LA-only.trec8-401.450.minus416-423-437-444-447.txt";
 		String topics = "C:/Users/Rui/eclipse-workspace/541/hw3Files/topics.401-450.txt";
 		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/student1.results";
+		String metaDataPath = "C:/Users/Rui/eclipse-workspace/541/hw3Files/id2MetaData.txt";
 //		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/correct-scores-for-student1-file/student1-measures.txt";
 //		Student 6 is bad maybe 10? may 12?
-		
+//		System.out.println(Math.log(2));
+		System.out.println(Math.exp(-1*20*(Math.log(2)/224)));
 		calcMeanAveragePrecision(resultFile, qrels);
 		calcPrecisionAt10(resultFile, qrels);
 		
 		calcNdcg10(resultFile, qrels);
 		calcNdcg1000(resultFile, qrels);
 		
+//		System.out.println(Math.log(499));
+		calcTBG(resultFile, qrels, metaDataPath);
 		
 
+	}
+	public static void calcTBG(String resultFile, String qrels, String metaDataPath) throws Exception {
+		ResultsFile resultsRaw = new ResultsFile(resultFile);
+		qRels qrelsList = new qRels(qrels);
+		HashMap<String, Integer> docno2Count = docno2docCount(metaDataPath);
+		Results results = resultsRaw.results;
+		ArrayList<Result> queryResult = new ArrayList<>();
+		ArrayList<String> topicIds = results.QueryIDs();
+		HashMap<String, ArrayList<Result>> query2Result = new HashMap<>();
+		HashMap<String, ArrayList<String>> topic2RelDocnos = new HashMap<>();
+		RelevanceJudgements relDocs = qrelsList.judgements;
+		ArrayList<Double> TBGList = new ArrayList<>();
+		ArrayList<String> reldocnos = new ArrayList<>();
+		for(String topicNum : topicIds) {
+			queryResult = results.QueryResults(topicNum);
+			query2Result.put(topicNum, queryResult);
+			topic2RelDocnos.put(topicNum, relDocs.getRelDocnos(topicNum));
+		}
+		double gainK = 0.64*0.77;
+		
+		double TSum = 0;
+		double DofTk =0;
+		Collections.sort(topicIds);
+		for(String topic : topicIds) {
+			double TBG = 0;
+			queryResult = query2Result.get(topic);
+			reldocnos = topic2RelDocnos.get(topic);
+			
+			for(Result result : queryResult) {
+				String docno = result.getDocID();
+				if(reldocnos.contains(docno)) {
+					int rank = result.getRank();
+					TSum = calcTimeofK(docno2Count, rank,queryResult, reldocnos);
+//					if(TSum > 30) {
+//						continue;
+//					}
+					DofTk = calcDofK(TSum);
+					TBG += gainK * DofTk;
+				}
+			}
+			TBGList.add(TBG);
+//			System.out.println(TBG);
+			
+		}
+		System.out.println(TBGList.toString());
+		
+	}
+	public static double calcTimeofK(
+									HashMap<String, 
+									Integer> docno2Count, 
+									int currentRank,
+									ArrayList<Result> queryResult,
+									ArrayList<String> reldocnos) {
+		
+		double TofK =0;
+		double Ts = 4.4;
+		double probClickGivenRel = 0.64;
+		double bConst = 7.8;
+		double Aslope = 0.018;
+		int tmpRank = 0;
+		
+		for(Result result: queryResult) {
+			if(tmpRank >= currentRank) {
+				break;
+			}
+			String docno = result.getDocID();
+			if(reldocnos.contains(docno)) {
+				tmpRank = result.getRank();
+//				if(tmpRank >= currentRank) {
+//					break;
+//				}
+				TofK += Ts + ((Aslope*docno2Count.get(docno) + bConst) * probClickGivenRel);
+				
+			}
+		}
+//		System.out.println("T of K: " + TofK);
+		return TofK;
+	}
+	public static double calcDofK(double TSum) {
+		double DofK = 0;
+		double hConst = 224;
+		
+		DofK = Math.exp(-1*TSum*(Math.log(2)/hConst));
+		
+		return DofK;
+	}
+	public static HashMap<String, Integer> docno2docCount(String metaDataPath) throws FileNotFoundException {
+		HashMap<String, Integer> docno2Count = new HashMap<>();
+		Scanner docno2Counttxt = new Scanner(new FileReader(metaDataPath ));
+		while(docno2Counttxt.hasNextLine()) {
+			String nextLine = docno2Counttxt.nextLine();
+			String[] nextLineArr = nextLine.split("\\|");
+			String[] data = nextLineArr[1].split("\\{}");
+			String docno = data[1];
+			int docCount = Integer.parseInt(data[4]);
+			docno2Count.put(docno, docCount);
+		}
+		docno2Counttxt.close();
+		
+//		for (String i: docno2Count.keySet()) {
+//			System.out.println(i + "  " + docno2Count.get(i));
+//		}
+		
+		return docno2Count;
+		
+		
+		
 	}
 	public static void calcNdcg1000(String resultFile, String qrels) throws Exception {
 		ResultsFile resultsRaw = new ResultsFile(resultFile);
@@ -55,10 +166,6 @@ public class Evaluate {
 				idcg += (1/(Math.log(i+1)/Math.log(2)));
 			}
 			String docno = "";
-//			int stop = 1000;
-//			if( stop != queryResult.size()) {
-//				stop = queryResult.size();
-//			}
 			for(int i=1; i<=queryResult.size(); i++ ) {
 				Result result = queryResult.get(i-1);
 //				System.out.println(result.getRank());
@@ -69,9 +176,6 @@ public class Evaluate {
 					
 				}
 			}
-			
-
-			
 			ndcg = dcg/idcg;
 			ndcgList.add(ndcg);
 //			System.out.println("Topic: "+ topic + " dcg: " + dcg +" idcg: " + idcg);
