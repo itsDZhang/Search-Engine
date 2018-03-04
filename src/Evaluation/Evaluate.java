@@ -69,12 +69,12 @@ public class Evaluate {
 					TBG += gainK * DofTk;
 				}
 			}
-//			System.out.println("Topic ID: " + topic+ " TBG: " + TBG);
+			System.out.println("Topic ID: " + topic+ " TBG: " + TBG);
 			TBGList.add(TBG);
 //			System.out.println(TBG);
 			
 		}
-		System.out.println(TBGList.toString());
+//		System.out.println(TBGList.toString());
 		
 	}
 	public static double calcTimeofK(
@@ -85,11 +85,11 @@ public class Evaluate {
 									ArrayList<String> reldocnos) {
 		
 		double TofK =0;
-		double Aslope = 0.018;
 		int tmpRank = 0;
 		
 //		int delete = 0;
 		for(Result result: queryResult) {
+			tmpRank = result.getRank();
 			if(tmpRank >= currentRank) {
 //				System.out.println(delete);
 				break;
@@ -99,19 +99,26 @@ public class Evaluate {
 //			delete++;
 			
 			String docno = result.getDocID();
+//			System.out.println(docno2Count.get("LA121589-0087"));
+//			System.out.println(docno2Count.get("LA062090-0079"));
+//			System.out.println(docno2Count.get("LA070190-0033"));
+//			System.out.println(docno2Count.get("LA030490-0051"));
+//			
 			
-			tmpRank = result.getRank();
-//			System.out.println(docno);
-			
-			TofK += (4.4 + ((Aslope*(docno2Count.get(docno)) + 7.8) * 0.64));
-//			if(reldocnos.contains(docno)) {
+//			System.out.println(tmpRank);
+			double docLength = docno2Count.get(docno);
+//			TofK += (4.4 + ((0.018*(docLength) + 7.8) * 0.64));
+			if(reldocnos.contains(docno)) {
 //				tmpRank = result.getRank();
-////				if(tmpRank >= currentRank) {
-////					break;
-////				}
+				TofK += (4.4 + ((0.018*(docLength) + 7.8) * 0.64));
+//				if(tmpRank >= currentRank) {
+//					break;
+//				}
 //				TofK += Ts + ((Aslope*docno2Count.get(docno) + bConst) * probClickGivenRel);
-//				
-//			}
+				
+			} else {
+				TofK += (4.4 + ((0.018*(docLength) + 7.8) * 0.39));
+			}
 		}
 //		System.out.println("T of K: " + TofK);
 		return TofK;
