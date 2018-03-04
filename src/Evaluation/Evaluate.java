@@ -47,26 +47,29 @@ public class Evaluate {
 		}
 		double gainK = 0.64*0.77;
 		
-		double TSum = 0;
-		double DofTk =0;
+		
 		Collections.sort(topicIds);
 		for(String topic : topicIds) {
 			double TBG = 0;
+			double TSum = 0;
+			double DofTk =0;
 			queryResult = query2Result.get(topic);
 			reldocnos = topic2RelDocnos.get(topic);
-			
+//			int delete = 0;
 			for(Result result : queryResult) {
+//				System.out.println(delete++);
 				String docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
 					int rank = result.getRank();
 					TSum = calcTimeofK(docno2Count, rank,queryResult, reldocnos);
-//					if(TSum > 30) {
-//						continue;
-//					}
+					if(TSum > 1800) {
+						continue;
+					}
 					DofTk = calcDofK(TSum);
 					TBG += gainK * DofTk;
 				}
 			}
+//			System.out.println("Topic ID: " + topic+ " TBG: " + TBG);
 			TBGList.add(TBG);
 //			System.out.println(TBG);
 			
@@ -82,34 +85,41 @@ public class Evaluate {
 									ArrayList<String> reldocnos) {
 		
 		double TofK =0;
-		double Ts = 4.4;
-		double probClickGivenRel = 0.64;
-		double bConst = 7.8;
 		double Aslope = 0.018;
 		int tmpRank = 0;
 		
+//		int delete = 0;
 		for(Result result: queryResult) {
 			if(tmpRank >= currentRank) {
+//				System.out.println(delete);
 				break;
 			}
+			
+//			System.out.println("tmp Rank: " + tmpRank + " currentRank " + currentRank);
+//			delete++;
+			
 			String docno = result.getDocID();
-			if(reldocnos.contains(docno)) {
-				tmpRank = result.getRank();
-//				if(tmpRank >= currentRank) {
-//					break;
-//				}
-				TofK += Ts + ((Aslope*docno2Count.get(docno) + bConst) * probClickGivenRel);
-				
-			}
+			
+			tmpRank = result.getRank();
+//			System.out.println(docno);
+			
+			TofK += (4.4 + ((Aslope*(docno2Count.get(docno)) + 7.8) * 0.64));
+//			if(reldocnos.contains(docno)) {
+//				tmpRank = result.getRank();
+////				if(tmpRank >= currentRank) {
+////					break;
+////				}
+//				TofK += Ts + ((Aslope*docno2Count.get(docno) + bConst) * probClickGivenRel);
+//				
+//			}
 		}
 //		System.out.println("T of K: " + TofK);
 		return TofK;
 	}
 	public static double calcDofK(double TSum) {
 		double DofK = 0;
-		double hConst = 224;
 		
-		DofK = Math.exp(-1*TSum*(Math.log(2)/hConst));
+		DofK = Math.exp(-1*TSum*(Math.log(2)/224));
 		
 		return DofK;
 	}
