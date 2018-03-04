@@ -11,21 +11,15 @@ public class Evaluate {
 		
 		String qrels = "C:/Users/Rui/eclipse-workspace/541/hw3Files/LA-only.trec8-401.450.minus416-423-437-444-447.txt";
 		String topics = "C:/Users/Rui/eclipse-workspace/541/hw3Files/topics.401-450.txt";
-		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/student1.results";
+		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/student2.results";
 		String metaDataPath = "C:/Users/Rui/eclipse-workspace/541/hw3Files/id2MetaData.txt";
-//		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/correct-scores-for-student1-file/student1-measures.txt";
-//		Student 6 is bad maybe 10? may 12?
-//		System.out.println(Math.log(2));
-		System.out.println(Math.exp(-1*20*(Math.log(2)/224)));
+		
 		calcMeanAveragePrecision(resultFile, qrels);
 		calcPrecisionAt10(resultFile, qrels);
 		
 		calcNdcg10(resultFile, qrels);
 		calcNdcg1000(resultFile, qrels);
-		
-//		System.out.println(Math.log(499));
 		calcTBG(resultFile, qrels, metaDataPath);
-		
 
 	}
 	public static void calcTBG(String resultFile, String qrels, String metaDataPath) throws Exception {
@@ -69,13 +63,18 @@ public class Evaluate {
 					TBG += gainK * DofTk;
 				}
 			}
-			System.out.println("Topic ID: " + topic+ " TBG: " + TBG);
+//			System.out.println( TBG);
 			TBGList.add(TBG);
 //			System.out.println(TBG);
 			
 		}
-//		System.out.println(TBGList.toString());
 		
+		double tmp = 0;
+		for(int i =0; i<TBGList.size();i++) {
+			tmp += TBGList.get(i);
+		}
+		System.out.println(tmp/TBGList.size());
+
 	}
 	public static double calcTimeofK(
 									HashMap<String, 
@@ -87,47 +86,25 @@ public class Evaluate {
 		double TofK =0;
 		int tmpRank = 0;
 		
-//		int delete = 0;
 		for(Result result: queryResult) {
 			tmpRank = result.getRank();
 			if(tmpRank >= currentRank) {
-//				System.out.println(delete);
 				break;
 			}
-			
-//			System.out.println("tmp Rank: " + tmpRank + " currentRank " + currentRank);
-//			delete++;
-			
 			String docno = result.getDocID();
-//			System.out.println(docno2Count.get("LA121589-0087"));
-//			System.out.println(docno2Count.get("LA062090-0079"));
-//			System.out.println(docno2Count.get("LA070190-0033"));
-//			System.out.println(docno2Count.get("LA030490-0051"));
-//			
-			
-//			System.out.println(tmpRank);
+//			System.out.println(docno);
 			double docLength = docno2Count.get(docno);
-//			TofK += (4.4 + ((0.018*(docLength) + 7.8) * 0.64));
 			if(reldocnos.contains(docno)) {
-//				tmpRank = result.getRank();
 				TofK += (4.4 + ((0.018*(docLength) + 7.8) * 0.64));
-//				if(tmpRank >= currentRank) {
-//					break;
-//				}
-//				TofK += Ts + ((Aslope*docno2Count.get(docno) + bConst) * probClickGivenRel);
-				
 			} else {
 				TofK += (4.4 + ((0.018*(docLength) + 7.8) * 0.39));
 			}
 		}
-//		System.out.println("T of K: " + TofK);
 		return TofK;
 	}
 	public static double calcDofK(double TSum) {
 		double DofK = 0;
-		
 		DofK = Math.exp(-1*TSum*(Math.log(2)/224));
-		
 		return DofK;
 	}
 	public static HashMap<String, Integer> docno2docCount(String metaDataPath) throws FileNotFoundException {
@@ -142,15 +119,7 @@ public class Evaluate {
 			docno2Count.put(docno, docCount);
 		}
 		docno2Counttxt.close();
-		
-//		for (String i: docno2Count.keySet()) {
-//			System.out.println(i + "  " + docno2Count.get(i));
-//		}
-		
 		return docno2Count;
-		
-		
-		
 	}
 	public static void calcNdcg1000(String resultFile, String qrels) throws Exception {
 		ResultsFile resultsRaw = new ResultsFile(resultFile);
@@ -185,22 +154,23 @@ public class Evaluate {
 			String docno = "";
 			for(int i=1; i<=queryResult.size(); i++ ) {
 				Result result = queryResult.get(i-1);
-//				System.out.println(result.getRank());
 				docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
-//					System.out.println(result.getRank());
 					dcg += (1/(Math.log(result.getRank() + 1)/Math.log(2)));
 					
 				}
 			}
 			ndcg = dcg/idcg;
 			ndcgList.add(ndcg);
-//			System.out.println("Topic: "+ topic + " dcg: " + dcg +" idcg: " + idcg);
-//			System.out.println("NDCG: "+ ndcg);
-			
+//			System.out.println(ndcg);
 		}
+		double tmp = 0;
+		for(int i =0; i<ndcgList.size();i++) {
+			tmp += ndcgList.get(i);
+		}
+		System.out.println(tmp/ndcgList.size());
 		
-		System.out.println(ndcgList.toString());
+//		System.out.println(ndcgList.toString());
 
 	}
 	
@@ -223,7 +193,6 @@ public class Evaluate {
 		}
 		Collections.sort(topicIds);
 		double ndcg = 0;
-		
 		for(String topic : topicIds) {
 			double dcg = 0;
 			double idcg = 0;
@@ -233,29 +202,31 @@ public class Evaluate {
 			if(reldocnos.size() <= checkSize) {
 				checkSize = reldocnos.size();
 			}
-			
 			for( int i =1; i <=checkSize; i++) {
 				idcg += (1/(Math.log(i+1)/Math.log(2)));
 			}
 			String docno = "";
-			
-			for(int breaker=1; breaker<=10; breaker++ ) {
+			int stop = 10;
+			if(stop>queryResult.size()) {
+				stop = queryResult.size();
+			}
+			for(int breaker=1; breaker<=stop; breaker++ ) {
 				Result result = queryResult.get(breaker-1);
-//				System.out.println(result.getRank());
 				docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
-//					System.out.println(result.getRank());
 					dcg += (1/(Math.log(result.getRank() + 1)/Math.log(2)));
 				}
 			}
 			ndcg = dcg/idcg;
 			ndcgList.add(ndcg);
-//			System.out.println("Topic: "+ topic + " dcg: " + dcg +" idcg: " + idcg);
-//			System.out.println("NDCG: "+ ndcg);
+//			System.out.println(ndcg);
 		}
-		
-		System.out.println(ndcgList.toString());
-		
+		double tmp = 0;
+		for(int i =0; i<ndcgList.size();i++) {
+			tmp += ndcgList.get(i);
+		}
+		System.out.println(tmp/ndcgList.size());
+//		System.out.println(ndcgList.toString());
 	}
 	
 	public static void calcPrecisionAt10(String resultFile, String qrels) throws Exception {
@@ -283,8 +254,13 @@ public class Evaluate {
 			double counter = 0.0;
 			double rank = 10.0;
 			String docno = "";
-			
-			for(int breaker=0; breaker<10; breaker++ ) {
+//			System.out.println(topic);
+			int stop = 10;
+			if(stop>queryResult.size()) {
+				stop = queryResult.size();
+			}
+			for(int breaker=0; breaker<stop; breaker++ ) {
+//				System.out.println("QueryResult: " + );
 				Result result = queryResult.get(breaker);
 				docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
@@ -293,8 +269,14 @@ public class Evaluate {
 			}
 			precision = counter/rank;
 			avgScores.add(precision);
+//			System.out.println(precision);
 		}
-		System.out.println(avgScores.toString());
+		double tmp = 0;
+		for(int i =0; i<avgScores.size();i++) {
+			tmp += avgScores.get(i);
+		}
+		System.out.println(tmp/avgScores.size());
+		
 	}
 	
 	public static void calcMeanAveragePrecision(String resultFile, String qrels) throws Exception {
@@ -327,9 +309,7 @@ public class Evaluate {
 			String docno = "";
 			
 			for( Result result : queryResult) {
-				
 				docno = result.getDocID();
-//				System.out.println(docno);
 				if(reldocnos.contains(docno)) {
 					counter +=1;
 					rank = (double) result.getRank();
@@ -337,13 +317,15 @@ public class Evaluate {
 					sum += precision;
 				}
 			}
-//			System.out.println( "Topic #: " + topic +
-//					" |count size: " + counter 
-//					+ " |reldocnos size: " + reldocnos.size() +
-//					" |queryResult size: " + queryResult.size());
 			avgScores.add(sum/reldocnos.size());
+//			System.out.println(sum/reldocnos.size());
 		}
-		System.out.println(avgScores.toString());
+		double tmp = 0;
+		for(int i =0; i<avgScores.size();i++) {
+			tmp += avgScores.get(i);
+		}
+		System.out.println(tmp/avgScores.size());
+//		System.out.println(avgScores.toString());
 	}
 
 }
