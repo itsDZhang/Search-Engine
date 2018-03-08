@@ -11,11 +11,11 @@ public class Evaluate {
 		
 		String qrels = "C:/Users/Rui/eclipse-workspace/541/hw3Files/LA-only.trec8-401.450.minus416-423-437-444-447.txt";
 		String topics = "C:/Users/Rui/eclipse-workspace/541/hw3Files/topics.401-450.txt";
-		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/student2.results";
+		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/student8.results";
 		String metaDataPath = "C:/Users/Rui/eclipse-workspace/541/hw3Files/id2MetaData.txt";
 		
 		try {
-		     File file = new File("students2.results");
+		     File file = new File("students8.results");
 		     /*If file gets created then the createNewFile() 
 		      * method would return true or if the file is 
 		      * already present it would return false
@@ -93,7 +93,7 @@ public class Evaluate {
 			
 			try
 			{
-			    String filename= "students2.results";
+			    String filename= "students8.results";
 			    FileWriter fw = new FileWriter(filename,true); 
 			    fw.write("TBG \t\t" + topic + "\t\t" + TBG+ "\n");
 			    fw.close();
@@ -207,7 +207,7 @@ public class Evaluate {
 			
 			try
 			{
-			    String filename= "students2.results";
+			    String filename= "students8.results";
 			    FileWriter fw = new FileWriter(filename,true); 
 			    fw.write("ndcg@1000 \t\t" + topic + "\t\t" + ndcg+ "\n");
 			    fw.close();
@@ -276,7 +276,7 @@ public class Evaluate {
 			
 			try
 			{
-			    String filename= "students2.results";
+			    String filename= "students8.results";
 			    FileWriter fw = new FileWriter(filename,true); 
 			    fw.write("ndcg@10 \t\t" + topic + "\t\t" + ndcg+ "\n");
 			    fw.close();
@@ -343,7 +343,7 @@ public class Evaluate {
 			
 			try
 			{
-			    String filename= "students2.results";
+			    String filename= "students8.results";
 			    FileWriter fw = new FileWriter(filename,true); 
 			    fw.write("Precision@10 \t\t" + topic + "\t\t" + precision + "\n");
 			    fw.close();
@@ -409,7 +409,7 @@ public class Evaluate {
 			
 			try
 			{
-			    String filename= "students2.results";
+			    String filename= "students8.results";
 			    FileWriter fw = new FileWriter(filename,true); 
 			    fw.write("AP \t\t" + topic + "\t\t" + (sum/reldocnos.size()) + "\n");
 			    fw.close();
