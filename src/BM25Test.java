@@ -1,13 +1,12 @@
-package BM25;
-
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BM25Main {
-	public static void main(String[] argv) throws IOException, ClassNotFoundException{
+public class BM25Test {
+
+public static void main(String[] argv) throws IOException, ClassNotFoundException{
 		
 		String localPath = "C:/Users/Rui/eclipse-workspace/541/hw4Files";
 //		String localPathQueries = args[0]+"/" +args[1];
@@ -19,6 +18,16 @@ public class BM25Main {
 		BufferedReader reader = new BufferedReader(decoder);
 		Scanner queries = new Scanner(reader);
 		HashMap<Integer, Integer> docId2Count = docID2docCount( localPath + "/id2MetaData.txt");
+//		double avg = 0;
+//		double count = 0;
+//		for(int i : docId2Count.keySet()) {
+//			avg += docId2Count.get(i);
+//			count ++;
+//		}
+//		System.out.println(avg/count);
+		
+		
+		
 		System.out.println("Starting to Read Inverted Index. Time: " + LocalDateTime.now());
 		FileInputStream fileRead = new FileInputStream(new File(localPath + "/invertedIndex.txt"));
 		ObjectInputStream toRead = new ObjectInputStream(fileRead);
@@ -41,7 +50,7 @@ public class BM25Main {
 		while(queries.hasNextLine()) {
 			BM25(queries.nextLine(), term2IdLexicon, invertedIndexRead, docId2Count);
 			
-			System.out.println(queries.nextLine());
+//			System.out.println(queries.nextLine());
 		}
 		
     }
@@ -68,12 +77,13 @@ public class BM25Main {
 			}
 			
 		}
+		TreeMap<Integer, Double> accumulator = new TreeMap<>(Collections.reverseOrder());
 		
 		
 		for( String term : queryTerms) {
 			int termId = term2Id.get(term);
 			ArrayList<DocIDCountPair> postings = invertedIndex.get(termId);
-			System.out.println(queryTerms.toString());
+			System.out.println("Term: " + term + " query: " + queryTerms.toString());
 			for(DocIDCountPair post: postings) {
 				docId = post.getDocID();
 //				id = term2Id.get(term);
@@ -97,11 +107,20 @@ public class BM25Main {
 				tf4Doc = ((k1 + 1)*fi)/(k+fi);
 				sumOfIterations += tf4Doc + tf4Query + logVal;
 				
-				System.out.println("DocId: " + docId + " " + "BM25: " + sumOfIterations);
+				if(accumulator.containsKey(docId)) {
+					accumulator.put(docId, accumulator.get(docId) + sumOfIterations);
+				} else {
+					accumulator.put(docId,sumOfIterations);
+				}
+//				System.out.println("DocId: " + docId + " " + "BM25: " + sumOfIterations);
 			}
 			
 			
 		}
+		for( Integer i: accumulator.keySet()) {
+			System.out.println("DocId: " + i + " Score: " + accumulator.get(i));
+		}
+		
 				
 	}
 	
@@ -114,17 +133,18 @@ public class BM25Main {
 		double k =0;
 		double b = 0.75;
 		int dl=0;
-		double avgdl = 0;
+		double avgdl = 534.47;
 		int termId = term2Id.get(term);
 		dl = docId2Count.get(docId);
-		ArrayList<DocIDCountPair> postings = invertedIndex.get(termId);
+		ArrayList<DocIDCountPair> postings = new ArrayList<>();
+		postings = invertedIndex.get(termId);
 		
-		for(DocIDCountPair post: postings) {
-			int tmpDocId = post.getDocID();
-			int docLenCount = docId2Count.get(tmpDocId);
-			avgdl+=docLenCount;
-		}
-		avgdl = avgdl/postings.size();
+//		for(DocIDCountPair post: postings) {
+//			int tmpDocId = post.getDocID();
+//			int docLenCount = docId2Count.get(tmpDocId);
+//			avgdl+=docLenCount;
+//		}
+//		avgdl = avgdl/postings.size();
 		
 		k = k1*((1-b)+ b*(dl/avgdl));
 		
@@ -173,7 +193,5 @@ public class BM25Main {
         else          return false;
     }
 	
-	
-	
-}
 
+}
