@@ -50,7 +50,6 @@ public class BM25Main {
 		double k1 = 1.2;
 		double k2 = 7;
 		double k;
-		
 		double tf4Doc, tf4Query, logVal, numofRelDocs, id, qfi, fi = 0; 
 		double sumOfIterations =0;
 		int numOfDocs = 131896;
