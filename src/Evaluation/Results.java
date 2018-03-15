@@ -17,9 +17,7 @@ public class Results {
 			this.docID = docID;
 			this.score = score;
 			this.rank = rank;
-			
 		}
-		
 		public String getDocID() {
 			return this.docID;
 		}
@@ -29,18 +27,9 @@ public class Results {
 		public int getRank() {
 			return this.rank;
 		}
-//		@Override;
+
 		public int compareTo(Result obj) {
-//			Result rhs = obj;
-//			Result lhs = this;
-//			if(lhs.score > rhs.getScore()) {
-//				return 1;
-//			} else if (lhs.score < rhs.getScore()) {
-//				return -1;
-//			} else {
-//				return -1 * lhs.docID.compareTo(rhs.docID);
-//			}
-//			=========================================================
+
 			Result rhs = (Result) obj;
             Result lhs = this;
             int scoreCompare = -1 * Double.compare(lhs.getScore(), rhs.getScore());
@@ -49,28 +38,8 @@ public class Results {
             } else {
                 return scoreCompare;
             }
-//			if( lhs.score == rhs.getScore()) {
-//				return -1*lhs.docID.compareTo(rhs.getDocID());
-//			} else if ( lhs.score > rhs.getScore()) {
-//				return -1;
-//			} else {
-//				return 1;
-//			}
-//			int scoreCompare = -1 * Double.compare(lhs.score, rhs.score);
-//			int scoreCompare = -1 * lhs.getScore().compareTo(rhs.getScore());
-//			
-////					lhs.score.CompareTo(rhs.score);
-//			
-//			if( scoreCompare == 0) {
-//				return -1 * lhs.docID.compareTo(rhs.docID);
-//			} else {
-//				return scoreCompare;
-//			}
-			
 		}
-		
 	}
-	
 	private HashMap<String, String> tupleKeys = new HashMap<>();
 	private HashMap<String, ArrayList<Result>> query2results = new HashMap<>();
 	private HashMap<String, Boolean> query2isSorted = new HashMap<>();
@@ -117,20 +86,10 @@ public class Results {
 		ArrayList<Result> results = (ArrayList)this.query2results.get(queryID);
 		if (!  this.query2isSorted.get(queryID)) {
 			Collections.sort(results);
-			
-//			for( Result i: results) {
-//				System.out.println(i.getRank());
-//			}
-//			
-			
-			
-//			results.sort(null);
+
 			this.query2isSorted.put(queryID, true);
-//			this.query2isSorted.get(queryID) = true;
 		}
 		return results;
-		
-		
 	}
 //	Might not work
 	public ArrayList<String> QueryIDs() {
@@ -138,10 +97,8 @@ public class Results {
 		for( String i : this.query2results.keySet()) {
 			keySet.add(i);
 		}
-		
 		return keySet;
 	}
-	
 	public Boolean queryIDExists(String queryID) {
 		return this.query2results.containsKey(queryID);
 	}

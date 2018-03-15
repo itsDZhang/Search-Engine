@@ -11,41 +11,27 @@ public class Evaluate {
 		
 		String qrels = "C:/Users/Rui/eclipse-workspace/541/hw3Files/LA-only.trec8-401.450.minus416-423-437-444-447.txt";
 		String topics = "C:/Users/Rui/eclipse-workspace/541/hw3Files/topics.401-450.txt";
-		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/student8.results";
-		String metaDataPath = "C:/Users/Rui/eclipse-workspace/541/hw3Files/id2MetaData.txt";
-		
+		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/student2.results";
+//		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/r255zhan-hw2-results.results";
+		String metaDataPath = "C:/Users/Rui/eclipse-workspace/541/hw3Files/id2MetaData.txt";	
 		try {
-		     File file = new File("students8.results");
-		     /*If file gets created then the createNewFile() 
-		      * method would return true or if the file is 
-		      * already present it would return false
-		      */
+			File file = new File("student2.results");
 	             boolean fvar = file.createNewFile();
 		     if (fvar){
-		          System.out.println("File has been created successfully");
+//		          System.out.println("File has been created successfully");
 		     }
 		     else{
-		          System.out.println("File already present at the specified location");
+//		          System.out.println("File already present at the specified location");
 		     }
 	    	} catch (IOException e) {
 	    		System.out.println("Exception Occurred:");
 		        e.printStackTrace();
 		  }
-		
-		
-		
 		ArrayList<Double> ap10 = calcMeanAveragePrecision(resultFile, qrels);
 		ArrayList<Double> precision10 = calcPrecisionAt10(resultFile, qrels);
 		ArrayList<Double> ndcgList10 = calcNdcg10(resultFile, qrels);
 		ArrayList<Double> ndcgList1000 = calcNdcg1000(resultFile, qrels);
 		ArrayList<Double> TBGList = calcTBG(resultFile, qrels, metaDataPath);
-		
-		
-		
-		
-		
-		
-
 	}
 	public static ArrayList<Double> calcTBG(String resultFile, String qrels, String metaDataPath) throws Exception {
 		ResultsFile resultsRaw = new ResultsFile(resultFile);
@@ -65,8 +51,6 @@ public class Evaluate {
 			topic2RelDocnos.put(topicNum, relDocs.getRelDocnos(topicNum));
 		}
 		double gainK = 0.64*0.77;
-		
-		
 		Collections.sort(topicIds);
 		for(String topic : topicIds) {
 			double TBG = 0;
@@ -89,11 +73,11 @@ public class Evaluate {
 				}
 			}
 			TBGList.add(TBG);
-			
-			
+//			
 			try
 			{
-			    String filename= "students8.results";
+				String filename= "student2.results";
+//			    String filename= "r255zhan-hw2-results.results";
 			    FileWriter fw = new FileWriter(filename,true); 
 			    fw.write("TBG \t\t" + topic + "\t\t" + TBG+ "\n");
 			    fw.close();
@@ -102,11 +86,6 @@ public class Evaluate {
 			{
 			    System.err.println("IOException: " + ioe.getMessage());
 			}
-			
-			
-			
-			
-			
 		}
 		double tmp = 0;
 		for(int i =0; i<TBGList.size();i++) {
@@ -202,12 +181,10 @@ public class Evaluate {
 			}
 			ndcg = dcg/idcg;
 			ndcgList.add(ndcg);
-			
-			
-			
 			try
 			{
-			    String filename= "students8.results";
+				String filename= "student2.results";
+//			    String filename= "r255zhan-hw2-results.results";
 			    FileWriter fw = new FileWriter(filename,true); 
 			    fw.write("ndcg@1000 \t\t" + topic + "\t\t" + ndcg+ "\n");
 			    fw.close();
@@ -223,14 +200,11 @@ public class Evaluate {
 		}
 		System.out.println(tmp/ndcgList.size());
 		return ndcgList;
-//		System.out.println(ndcgList.toString());
-
 	}
 	
 	public static ArrayList<Double> calcNdcg10(String resultFile, String qrels) throws Exception {
 		ResultsFile resultsRaw = new ResultsFile(resultFile);
 		qRels qrelsList = new qRels(qrels);
-		
 		Results results = resultsRaw.results;
 		ArrayList<Result> queryResult = new ArrayList<>();
 		ArrayList<String> topicIds = results.QueryIDs();
@@ -262,21 +236,27 @@ public class Evaluate {
 			int stop = 10;
 			if(stop>queryResult.size()) {
 				stop = queryResult.size();
+				
 			}
 			for(int breaker=1; breaker<=stop; breaker++ ) {
 				Result result = queryResult.get(breaker-1);
 				docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
+//					System.out.println("rank: " + result.getRank());
+//					System.out.println(breaker);
 					dcg += (1/(Math.log(result.getRank() + 1)/Math.log(2)));
 				}
 			}
+			
 			ndcg = dcg/idcg;
+//			System.out.println(topic + " NDCG@10: " + ndcg);
 			ndcgList.add(ndcg);
 			
 			
 			try
 			{
-			    String filename= "students8.results";
+//				String filename= "r255zhan-hw2-results.results";
+			    String filename= "student2.results";
 			    FileWriter fw = new FileWriter(filename,true); 
 			    fw.write("ndcg@10 \t\t" + topic + "\t\t" + ndcg+ "\n");
 			    fw.close();
@@ -285,17 +265,12 @@ public class Evaluate {
 			{
 			    System.err.println("IOException: " + ioe.getMessage());
 			}
-			
-			
-			
-			
 		}
 		double tmp = 0;
 		for(int i =0; i<ndcgList.size();i++) {
 			tmp += ndcgList.get(i);
 		}
 		System.out.println(tmp/ndcgList.size());
-//		System.out.println(ndcgList.toString());
 		return ndcgList;
 	}
 	
@@ -328,6 +303,7 @@ public class Evaluate {
 			int stop = 10;
 			if(stop>queryResult.size()) {
 				stop = queryResult.size();
+				rank = queryResult.size();
 			}
 			for(int breaker=0; breaker<stop; breaker++ ) {
 //				System.out.println("QueryResult: " + );
@@ -339,11 +315,10 @@ public class Evaluate {
 			}
 			precision = counter/rank;
 			avgScores.add(precision);
-			
-			
 			try
 			{
-			    String filename= "students8.results";
+//				String filename= "r255zhan-hw2-results.results";
+			    String filename= "student2.results";
 			    FileWriter fw = new FileWriter(filename,true); 
 			    fw.write("Precision@10 \t\t" + topic + "\t\t" + precision + "\n");
 			    fw.close();
@@ -352,10 +327,6 @@ public class Evaluate {
 			{
 			    System.err.println("IOException: " + ioe.getMessage());
 			}
-			
-			
-			
-			
 		}
 		double tmp = 0;
 		for(int i =0; i<avgScores.size();i++) {
@@ -405,11 +376,10 @@ public class Evaluate {
 				}
 			}
 			avgScores.add(sum/reldocnos.size());
-			
-			
 			try
 			{
-			    String filename= "students8.results";
+//				String filename= "r255zhan-hw2-results.results";
+			    String filename= "student2.results";
 			    FileWriter fw = new FileWriter(filename,true); 
 			    fw.write("AP \t\t" + topic + "\t\t" + (sum/reldocnos.size()) + "\n");
 			    fw.close();
@@ -418,10 +388,6 @@ public class Evaluate {
 			{
 			    System.err.println("IOException: " + ioe.getMessage());
 			}
-			
-			
-			
-			
 		}
 		double tmp = 0;
 		for(int i =0; i<avgScores.size();i++) {
@@ -429,7 +395,6 @@ public class Evaluate {
 		}
 		System.out.println(tmp/avgScores.size());
 		return avgScores;
-//		System.out.println(avgScores.toString());
 	}
 
 }

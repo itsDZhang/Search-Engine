@@ -8,11 +8,8 @@ public class ResultsFile {
 	public String runID;
 	
 	public ResultsFile(String fullpath) throws Exception {
-//		char[] whitespace = {'\t',' '};
-		
-		
+
 		Scanner sr = new Scanner(new FileReader(fullpath));
-		
 		boolean firstLine = true;
 		String line = "";
 		
@@ -25,7 +22,13 @@ public class ResultsFile {
 			}
 			String queryID = fields[0];
 			String docID = fields[2];
-			int rank = Integer.parseInt(fields[3]);
+			int rank = 0;
+			try {
+				rank = Integer.parseInt(fields[3]);
+			} catch (Exception e) {
+				System.out.println("An error occured");
+			}
+			
 			double score = Double.parseDouble(fields[4]);
 			results.AddResults(queryID, docID, score, rank);
 			if( firstLine) {
@@ -36,7 +39,6 @@ public class ResultsFile {
 			else if( !this.runID.equals(fields[5])) {
 
 				throw new Exception("mismatching runID in file");
-				
 			}
 			
 		}
