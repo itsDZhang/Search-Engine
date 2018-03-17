@@ -268,13 +268,7 @@ public class IndexEngine {
 	}
 	//To tokenize
 	public static ArrayList<String> tokenize(String text) {
-//		========================= Porter Stemming ========================
-		
-		text = PorterStemmer.stem(text);
-	
-		
-		
-//		========================
+
 		text = text.toLowerCase();
 		ArrayList<String> tokens = new ArrayList<String>();
 		int start = 0;
@@ -284,15 +278,22 @@ public class IndexEngine {
 			String c = text.substring(i, i+1);
 			if(  checkForCharAndDigits(c) ) {
 				if( start != i ) {
-					String token = text.substring(start, i);
+//					String token = text.substring(start, i);
+//					========================= Porter Stemming ========================
+					String token = PorterStemmer.stem(text.substring(start, i));
+//					========================================
 					tokens.add(token);
 				}
 				start = i+1;
 			}
 		}
 		if(start!=i) {
-			tokens.add(text.substring(start, i));
+//			========================= Porter Stemming ========================
+			tokens.add(PorterStemmer.stem(text.substring(start, i)));
+//			========================================
+//			tokens.add(text.substring(start, i));
 		}
+		
 		return tokens;
 	}
 	public static boolean checkForCharAndDigits(String str) {

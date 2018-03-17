@@ -19,7 +19,8 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		Scanner queries = new Scanner(reader);
 		HashMap<Integer, Integer> docId2Count = docID2docCount( localPath + "/id2MetaData.txt");
 		try {
-			File file = new File("/hw4Files/r255zhan-hw4-bm25-baseline.txt");
+			File file = new File( "r255zhan-hw4-bm25-baseline.txt");
+//			File file = new File( "r255zhan-hw4-bm25-stemmed.txt");
 	             boolean fvar = file.createNewFile();
 		     if (fvar){
 //		          System.out.println("File has been created successfully");
@@ -43,19 +44,19 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		
 		System.out.println("Starting to Read Inverted Index. Time: " + LocalDateTime.now());
 		FileInputStream fileRead = new FileInputStream(new File(localPath + "/invertedIndex.txt"));
+//		FileInputStream fileRead = new FileInputStream(new File(localPath + "/invertedIndexStemmed.txt"));
 		ObjectInputStream toRead = new ObjectInputStream(fileRead);
 		@SuppressWarnings("unchecked")
 		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndexRead  = (HashMap<Integer, ArrayList<DocIDCountPair>>) toRead.readObject();
 		System.out.println("Read Inverted Index. Time: " + LocalDateTime.now());
 //		Reading term2Id Lexicon
 		fileRead = new FileInputStream(new File(localPath + "/term2IdLexicon.txt"));
+//		fileRead = new FileInputStream(new File(localPath + "/term2IdLexiconStemmed.txt"));
 		toRead = new ObjectInputStream(fileRead);
 		@SuppressWarnings("unchecked")
 		HashMap <String, Integer> term2IdLexicon =  (HashMap<String, Integer>) toRead.readObject();
 		System.out.println("Read Everything");
 //		Reading the metaData
-		
-
 		
 		while(queries.hasNextLine()) {
 			String line = queries.nextLine();
@@ -138,13 +139,16 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 			
 		}
 		Map sortedMap = sortByValue(accumulator);
+		int counter = 1;
 		for( Object i: sortedMap.keySet()) {
+			if(counter == 1001) break;
+			
 			try
 			{
-				String filename= "/hw4Files/r255zhan-hw4-bm25-baseline.txt";
-//			    String filename= "r255zhan-hw2-results.results";
+				String filename= "r255zhan-hw4-bm25-baseline.txt";
+//				String filename= "r255zhan-hw4-bm25-stemmed.txt";
 			    FileWriter fw = new FileWriter(filename,true); 
-			    fw.write(topic + i + accumulator.get(i) + "r255zhan");
+			    fw.write(topic + " "+ i + " " + accumulator.get(i) + " "+ "r255zhan" + "\n");
 			    fw.close();
 			}
 			catch(IOException ioe)
@@ -154,7 +158,9 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 			
 //			Double.parseDouble((String) i)
 //			System.out.println("DocId: " + i + " Score: " + accumulator.get(i));
+			counter ++;
 		}
+		
 		
 				
 	}
@@ -206,8 +212,8 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		double k =0;
 		double b = 0.75;
 		int dl=0;
-//		double avgdl = 534.47;
-		double avgdl = 513.46;
+		double avgdl = 534.47;
+//		double avgdl = 513.46;
 		int termId = term2Id.get(term);
 		dl = docId2Count.get(docId);
 		ArrayList<DocIDCountPair> postings = new ArrayList<>();
