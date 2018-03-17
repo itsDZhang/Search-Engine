@@ -40,8 +40,8 @@ public class IndexEngine {
 		}
 		String localPathGzip = args[0];
 		String localPathProcess = args[1];
-//		String localPathProcess = "C:/Users/Rui/eclipse-workspace/541-Hw1";
-//		String localPathGzip = "C:/Users/Rui/eclipse-workspace/541-Hw1/latimes.gz";
+//		String localPathProcess = "C:/Users/Rui/eclipse-workspace/541";
+//		String localPathGzip = "C:/Users/Rui/eclipse-workspace/541/latimes.gz";
 //		File results = new File(localPathProcess + "/filesToBeStored");
 //		if ( results.exists()) {
 //			System.out.println("The directory "+ "filesToBeStored" + " already exists.");
@@ -103,7 +103,9 @@ public class IndexEngine {
 //				and puts them into its hashmaps and makes a file
 				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
 				doc2Id.put(getDocNo(storage4Data),internalId);
-				makeFile(storage4File, internalId, storage4Data, localPathProcess);
+				
+//				makeFile(storage4File, internalId, storage4Data, localPathProcess);
+				
 //				Clears the temp story for the next file
 				storage4Data = "";
 				storage4File = new ArrayList<String>();
@@ -133,17 +135,20 @@ public class IndexEngine {
 	    }
 //		Writing inverted index
 //	    FileOutputStream file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/invertedIndex.txt"));
-		FileOutputStream file = new FileOutputStream(new File(localPathProcess + "/index/invertedIndex.txt"));
+//	    FileOutputStream file = new FileOutputStream(new File(localPathProcess + "/index/invertedIndex.txt"));
+		FileOutputStream file = new FileOutputStream(new File(localPathProcess + "/index/invertedIndexStemmed.txt"));
 		ObjectOutputStream toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(invertedIndex);
 //		Writing id 2 term lexicon
-		file = new FileOutputStream(new File(localPathProcess + "/index/id2TermLexicon.txt"));
+//		file = new FileOutputStream(new File(localPathProcess + "/index/id2TermLexicon.txt"));
+		file = new FileOutputStream(new File(localPathProcess + "/index/id2TermLexiconStemmed.txt"));
 //		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/id2TermLexicon.txt"));
 		toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(id2TermLexicon);
 //		Writing term 2 id lexicon
 //		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/term2IdLexicon.txt"));
-		file = new FileOutputStream(new File(localPathProcess + "/index/term2IdLexicon.txt"));
+//		file = new FileOutputStream(new File(localPathProcess + "/index/term2IdLexicon.txt"));
+		file = new FileOutputStream(new File(localPathProcess + "/index/term2IdLexiconStemmed.txt"));
 		toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(term2IdLexicon);
 		
@@ -263,6 +268,13 @@ public class IndexEngine {
 	}
 	//To tokenize
 	public static ArrayList<String> tokenize(String text) {
+//		========================= Porter Stemming ========================
+		
+		text = PorterStemmer.stem(text);
+	
+		
+		
+//		========================
 		text = text.toLowerCase();
 		ArrayList<String> tokens = new ArrayList<String>();
 		int start = 0;

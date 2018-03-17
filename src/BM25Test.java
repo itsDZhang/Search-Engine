@@ -18,6 +18,19 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		BufferedReader reader = new BufferedReader(decoder);
 		Scanner queries = new Scanner(reader);
 		HashMap<Integer, Integer> docId2Count = docID2docCount( localPath + "/id2MetaData.txt");
+		try {
+			File file = new File("/hw4Files/r255zhan-hw4-bm25-baseline.txt");
+	             boolean fvar = file.createNewFile();
+		     if (fvar){
+//		          System.out.println("File has been created successfully");
+		     }
+		     else{
+//		          System.out.println("File already present at the specified location");
+		     }
+	    	} catch (IOException e) {
+	    		System.out.println("Exception Occurred:");
+		        e.printStackTrace();
+		  }
 //		double avg = 0;
 //		double count = 0;
 //		for(int i : docId2Count.keySet()) {
@@ -42,20 +55,27 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		System.out.println("Read Everything");
 //		Reading the metaData
 		
-//	    String word = "running" ;
-//		String stem = PorterStemmer.stem(word);
-//		System.out.println(word + " -> " + stem);
-		
+
 		
 		while(queries.hasNextLine()) {
-			BM25(queries.nextLine(), term2IdLexicon, invertedIndexRead, docId2Count);
+			String line = queries.nextLine();
+			String topic = line.substring(0, 3);
+			line = extractTopic(line);
+			
+			
+			BM25(topic, line, term2IdLexicon, invertedIndexRead, docId2Count);
 			
 //			System.out.println(queries.nextLine());
 		}
 		
     }
 	
-	public static void BM25(
+	public static String extractTopic(String line) {
+		return line.substring(3, line.length());
+	}
+	
+	
+	public static void BM25(String topic,
 			String query, 
 			HashMap <String, Integer> term2Id, 
 			HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex,
@@ -77,7 +97,7 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 			}
 			
 		}
-		TreeMap<Integer, Double> accumulator = new TreeMap<>(Collections.reverseOrder());
+		Map<Integer, Double> accumulator = new HashMap<>();
 		
 		
 		for( String term : queryTerms) {
@@ -105,7 +125,7 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 //				}
 				fi = post.getCount();
 				tf4Doc = ((k1 + 1)*fi)/(k+fi);
-				sumOfIterations += tf4Doc + tf4Query + logVal;
+				sumOfIterations = tf4Doc + tf4Query + logVal;
 				
 				if(accumulator.containsKey(docId)) {
 					accumulator.put(docId, accumulator.get(docId) + sumOfIterations);
@@ -117,13 +137,66 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 			
 			
 		}
-		for( Integer i: accumulator.keySet()) {
-			System.out.println("DocId: " + i + " Score: " + accumulator.get(i));
+		Map sortedMap = sortByValue(accumulator);
+		for( Object i: sortedMap.keySet()) {
+			try
+			{
+				String filename= "/hw4Files/r255zhan-hw4-bm25-baseline.txt";
+//			    String filename= "r255zhan-hw2-results.results";
+			    FileWriter fw = new FileWriter(filename,true); 
+			    fw.write(topic + i + accumulator.get(i) + "r255zhan");
+			    fw.close();
+			}
+			catch(IOException ioe)
+			{
+			    System.err.println("IOException: " + ioe.getMessage());
+			}
+			
+//			Double.parseDouble((String) i)
+//			System.out.println("DocId: " + i + " Score: " + accumulator.get(i));
 		}
 		
 				
 	}
 	
+	private static Map<Integer, Double> sortByValue(Map<Integer, Double> unsortMap) {
+
+        // 1. Convert Map to List of Map
+        List<Map.Entry<Integer, Double>> list =
+                new LinkedList<Map.Entry<Integer, Double>>(unsortMap.entrySet());
+
+        // 2. Sort list with Collections.sort(), provide a custom Comparator
+        //    Try switch the o1 o2 position for a different order
+        Collections.sort(list, new Comparator<Map.Entry<Integer, Double>>() {
+            public int compare(Map.Entry<Integer, Double> o1,
+                               Map.Entry<Integer, Double> o2) {
+                return (o2.getValue()).compareTo(o1.getValue());
+            }
+        });
+
+        // 3. Loop the sorted list and put it into a new insertion order Map LinkedHashMap
+        Map<Integer, Double> sortedMap = new LinkedHashMap<Integer, Double>();
+        for (Map.Entry<Integer, Double> entry : list) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+
+        /*
+        //classic iterator example
+        for (Iterator<Map.Entry<String, Integer>> it = list.iterator(); it.hasNext(); ) {
+            Map.Entry<String, Integer> entry = it.next();
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }*/
+
+
+        return sortedMap;
+    }
+
+//	public static Map sortByValue(Map unsortedMap) {
+//		Map sortedMap = new TreeMap(new ValueComparator(unsortedMap));
+//		sortedMap.putAll(unsortedMap);
+//		return sortedMap;
+//	}
+//	
 	public static double calcK(double k1,
 			int docId, 
 			HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex,
@@ -133,7 +206,8 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		double k =0;
 		double b = 0.75;
 		int dl=0;
-		double avgdl = 534.47;
+//		double avgdl = 534.47;
+		double avgdl = 513.46;
 		int termId = term2Id.get(term);
 		dl = docId2Count.get(docId);
 		ArrayList<DocIDCountPair> postings = new ArrayList<>();
@@ -195,3 +269,4 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 	
 
 }
+
