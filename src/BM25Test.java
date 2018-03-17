@@ -57,14 +57,16 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		HashMap <String, Integer> term2IdLexicon =  (HashMap<String, Integer>) toRead.readObject();
 		System.out.println("Read Everything");
 //		Reading the metaData
-		
+		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
+		id2MetaData = generateid2MetaDataHash(localPath +"/id2MetaData.txt");
+
 		while(queries.hasNextLine()) {
 			String line = queries.nextLine();
 			String topic = line.substring(0, 3);
 			line = extractTopic(line);
 			
 			
-			BM25(topic, line, term2IdLexicon, invertedIndexRead, docId2Count);
+			BM25(topic, line, term2IdLexicon, invertedIndexRead, docId2Count, id2MetaData);
 			
 //			System.out.println(queries.nextLine());
 		}
@@ -80,7 +82,8 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 			String query, 
 			HashMap <String, Integer> term2Id, 
 			HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex,
-			HashMap<Integer, Integer> docId2Count) {
+			HashMap<Integer, Integer> docId2Count,
+			HashMap<Integer, metaData> id2MetaData) {
 		double k1 = 1.2;
 		double k2 = 7;
 		double k;
@@ -113,7 +116,8 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 				qfi = queryFreq.get(term);
 				tf4Query = (((k2+1)*qfi)/(k2+qfi));
 				
-				k = calcK(k1,docId, invertedIndex, term2Id,term, docId2Count);
+//				k = calcK(k1,docId, invertedIndex, term2Id,term, docId2Count);
+				k = 1;
 				
 //				int termId = term2Id.get(term);
 //				ArrayList<DocIDCountPair> postings = invertedIndex.get(termId);
@@ -143,26 +147,24 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		for( Object i: sortedMap.keySet()) {
 			if(counter == 1001) break;
 			
+			String docno = id2MetaData.get(i).getDocNo();
+			
 			try
 			{
 				String filename= "r255zhan-hw4-bm25-baseline.txt";
 //				String filename= "r255zhan-hw4-bm25-stemmed.txt";
 			    FileWriter fw = new FileWriter(filename,true); 
-			    fw.write(topic + " "+ i + " " + accumulator.get(i) + " "+ "r255zhan" + "\n");
+			    fw.write(topic + " Q0 "+ docno + " " + accumulator.get(i) + " "+ "r255zhan" + "\n");
 			    fw.close();
 			}
 			catch(IOException ioe)
 			{
 			    System.err.println("IOException: " + ioe.getMessage());
 			}
-			
 //			Double.parseDouble((String) i)
 //			System.out.println("DocId: " + i + " Score: " + accumulator.get(i));
 			counter ++;
 		}
-		
-		
-				
 	}
 	
 	private static Map<Integer, Double> sortByValue(Map<Integer, Double> unsortMap) {
@@ -256,6 +258,9 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 			String c = text.substring(i, i+1);
 			if(  checkForCharAndDigits(c) ) {
 				if( start != i ) {
+//					========================= Porter Stemming ========================
+//					String token = PorterStemmer.stem(text.substring(start, i));
+//					========================================
 					String token = text.substring(start, i);
 					tokens.add(token);
 				}
@@ -263,6 +268,9 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 			}
 		}
 		if(start!=i) {
+//			========================= Porter Stemming ========================
+//			tokens.add(PorterStemmer.stem(text.substring(start, i)));
+//			========================================
 			tokens.add(text.substring(start, i));
 		}
 		return tokens;
@@ -272,6 +280,20 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
         if (m.find()) return true;
         else          return false;
     }
+//	This method grabs the id to metadata txt file, reads it, and populates the hashmap	
+	public static HashMap<Integer, metaData> generateid2MetaDataHash(String localPath) throws FileNotFoundException {
+		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
+		Scanner id2MetaDatatxt = new Scanner(new FileReader(localPath));
+		while(id2MetaDatatxt.hasNextLine()) {
+			String nextLine = id2MetaDatatxt.nextLine();
+			String[] nextLineArr = nextLine.split("\\|");
+			int key = Integer.parseInt(nextLineArr[0]);
+			String[] data = nextLineArr[1].split("\\{}");
+			metaData meta = new metaData(Integer.parseInt(data[0]), data[1], data[2],data[3], data[4]);
+			id2MetaData.put(key, meta);
+		}
+		return id2MetaData;
+	}
 	
 
 }
