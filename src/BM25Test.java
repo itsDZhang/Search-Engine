@@ -89,7 +89,7 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		double k;
 		double tf4Doc, tf4Query, logVal, numofRelDocs, id, qfi, fi = 0; 
 		double sumOfIterations =0;
-		int numOfDocs = 131896;
+		double numOfDocs = 131896;
 		int docId = 0;
 		ArrayList<String> queryTerms = tokenize(query);
 		HashMap<String, Integer> queryFreq = new HashMap<>();
@@ -116,8 +116,8 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 				qfi = queryFreq.get(term);
 				tf4Query = (((k2+1)*qfi)/(k2+qfi));
 				
-//				k = calcK(k1,docId, invertedIndex, term2Id,term, docId2Count);
-				k = 1;
+				k = calcK(k1,docId, invertedIndex, term2Id,term, docId2Count);
+//				k = 1;
 				
 //				int termId = term2Id.get(term);
 //				ArrayList<DocIDCountPair> postings = invertedIndex.get(termId);
@@ -130,7 +130,7 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 //				}
 				fi = post.getCount();
 				tf4Doc = ((k1 + 1)*fi)/(k+fi);
-				sumOfIterations = tf4Doc + tf4Query + logVal;
+				sumOfIterations = tf4Doc * tf4Query * logVal;
 				
 				if(accumulator.containsKey(docId)) {
 					accumulator.put(docId, accumulator.get(docId) + sumOfIterations);
