@@ -16,6 +16,7 @@ public class ResultsFile {
 		while(sr.hasNextLine()) {
 			line = sr.nextLine();
 //			System.out.println(line);
+//			System.out.println(line);
 			String[] fields = line.split("\\s+");
 			if(fields.length != 6) {
 				throw new Exception("input should have 6 columns");

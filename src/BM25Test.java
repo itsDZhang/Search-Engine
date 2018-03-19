@@ -18,6 +18,13 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		BufferedReader reader = new BufferedReader(decoder);
 		Scanner queries = new Scanner(reader);
 		HashMap<Integer, Integer> docId2Count = docID2docCount( localPath + "/id2MetaData.txt");
+//		double count = 0;
+//		for (int i: docId2Count.keySet()) {
+//			count += (double)docId2Count.get(i);
+//		}
+//		System.out.println(count/docId2Count.size());
+//		
+//		System.exit(0);
 		try {
 			File file = new File( "r255zhan-hw4-bm25-baseline.txt");
 //			File file = new File( "r255zhan-hw4-bm25-stemmed.txt");
@@ -32,15 +39,6 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 	    		System.out.println("Exception Occurred:");
 		        e.printStackTrace();
 		  }
-//		double avg = 0;
-//		double count = 0;
-//		for(int i : docId2Count.keySet()) {
-//			avg += docId2Count.get(i);
-//			count ++;
-//		}
-//		System.out.println(avg/count);
-		
-		
 		
 		System.out.println("Starting to Read Inverted Index. Time: " + LocalDateTime.now());
 		FileInputStream fileRead = new FileInputStream(new File(localPath + "/invertedIndex.txt"));
@@ -124,17 +122,6 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 				tf4Query = (((k2+1)*qfi)/(k2+qfi));
 				
 				k = calcK(k1,docId, invertedIndex, term2Id,term, docId2Count);
-//				k = 1;
-				
-//				int termId = term2Id.get(term);
-//				ArrayList<DocIDCountPair> postings = invertedIndex.get(termId);
-//				for(DocIDCountPair posttmp: postings) {
-//					int docTmpId = posttmp.getDocID();
-//					if(docTmpId == docId) {
-//						fi = post.getCount();
-//						break;
-//					}
-//				}
 				fi = post.getCount();
 				tf4Doc = ((k1 + 1)*fi)/(k+fi);
 				sumOfIterations = tf4Doc * tf4Query * logVal;
@@ -144,10 +131,7 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 				} else {
 					accumulator.put(docId,sumOfIterations);
 				}
-//				System.out.println("DocId: " + docId + " " + "BM25: " + sumOfIterations);
 			}
-			
-			
 		}
 		Map sortedMap = sortByValue(accumulator);
 		int counter = 1;
@@ -168,50 +152,26 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 			{
 			    System.err.println("IOException: " + ioe.getMessage());
 			}
-//			Double.parseDouble((String) i)
-//			System.out.println("DocId: " + i + " Score: " + accumulator.get(i));
 			counter ++;
 		}
 	}
-	
+//	Credits: https://www.mkyong.com/java/how-to-sort-a-map-in-java/
 	private static Map<Integer, Double> sortByValue(Map<Integer, Double> unsortMap) {
-
-        // 1. Convert Map to List of Map
         List<Map.Entry<Integer, Double>> list =
                 new LinkedList<Map.Entry<Integer, Double>>(unsortMap.entrySet());
-
-        // 2. Sort list with Collections.sort(), provide a custom Comparator
-        //    Try switch the o1 o2 position for a different order
         Collections.sort(list, new Comparator<Map.Entry<Integer, Double>>() {
             public int compare(Map.Entry<Integer, Double> o1,
                                Map.Entry<Integer, Double> o2) {
                 return (o2.getValue()).compareTo(o1.getValue());
             }
         });
-
-        // 3. Loop the sorted list and put it into a new insertion order Map LinkedHashMap
         Map<Integer, Double> sortedMap = new LinkedHashMap<Integer, Double>();
         for (Map.Entry<Integer, Double> entry : list) {
             sortedMap.put(entry.getKey(), entry.getValue());
         }
-
-        /*
-        //classic iterator example
-        for (Iterator<Map.Entry<String, Integer>> it = list.iterator(); it.hasNext(); ) {
-            Map.Entry<String, Integer> entry = it.next();
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }*/
-
-
         return sortedMap;
     }
 
-//	public static Map sortByValue(Map unsortedMap) {
-//		Map sortedMap = new TreeMap(new ValueComparator(unsortedMap));
-//		sortedMap.putAll(unsortedMap);
-//		return sortedMap;
-//	}
-//	
 	public static double calcK(double k1,
 			int docId, 
 			HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex,
@@ -227,14 +187,6 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		dl = docId2Count.get(docId);
 		ArrayList<DocIDCountPair> postings = new ArrayList<>();
 		postings = invertedIndex.get(termId);
-		
-//		for(DocIDCountPair post: postings) {
-//			int tmpDocId = post.getDocID();
-//			int docLenCount = docId2Count.get(tmpDocId);
-//			avgdl+=docLenCount;
-//		}
-//		avgdl = avgdl/postings.size();
-		
 		k = k1*((1-b)+ b*(dl/avgdl));
 		
 		return k;
@@ -253,7 +205,6 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		docno2Counttxt.close();
 		return docID2Count;
 	}
-
 	//To tokenize
 	public static ArrayList<String> tokenize(String text) {
 		text = text.toLowerCase();

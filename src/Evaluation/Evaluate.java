@@ -11,7 +11,9 @@ public class Evaluate {
 		
 		String qrels = "C:/Users/Rui/eclipse-workspace/541/hw3Files/LA-only.trec8-401.450.minus416-423-437-444-447.txt";
 		String topics = "C:/Users/Rui/eclipse-workspace/541/hw3Files/topics.401-450.txt";
-		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/student2.results";
+//		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/student2.results";
+//		String resultFile = "C:\\Users\\Rui\\eclipse-workspace\\541\\hw4Files/r255zhan-hw4-bm25-baseline.txt";
+		String resultFile = "C:\\Users\\Rui\\eclipse-workspace\\541\\hw4Files/r255zhan-hw4-bm25-stemmed.txt";
 //		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/r255zhan-hw2-results.results";
 		String metaDataPath = "C:/Users/Rui/eclipse-workspace/541/hw3Files/id2MetaData.txt";	
 		try {
