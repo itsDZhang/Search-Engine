@@ -59,7 +59,14 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 //		Reading the metaData
 		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
 		id2MetaData = generateid2MetaDataHash(localPath +"/id2MetaData.txt");
-
+		
+		
+//		System.out.println("Length of Inverted Index: " + invertedIndexRead.keySet().size() +
+//				"Length of Lexicon: " + term2IdLexicon.keySet().size());
+//		
+//		System.exit(0);
+		
+		
 		while(queries.hasNextLine()) {
 			String line = queries.nextLine();
 			String topic = line.substring(0, 3);
@@ -151,10 +158,10 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 			
 			try
 			{
-				String filename= "r255zhan-hw4-bm25-baseline.txt";
 //				String filename= "r255zhan-hw4-bm25-stemmed.txt";
+				String filename= "r255zhan-hw4-bm25-baseline.txt";
 			    FileWriter fw = new FileWriter(filename,true); 
-			    fw.write(topic + " Q0 "+ docno + " " + accumulator.get(i) + " "+ "r255zhan" + "\n");
+			    fw.write(topic + " Q0 "+ docno + " " + counter + " " + accumulator.get(i) + " "+ "r255zhan" + "\n");
 			    fw.close();
 			}
 			catch(IOException ioe)
