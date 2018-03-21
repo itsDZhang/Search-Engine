@@ -1,4 +1,4 @@
-import java.io.*;
+import java.io.*; 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -18,16 +18,10 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		BufferedReader reader = new BufferedReader(decoder);
 		Scanner queries = new Scanner(reader);
 		HashMap<Integer, Integer> docId2Count = docID2docCount( localPath + "/id2MetaData.txt");
-//		double count = 0;
-//		for (int i: docId2Count.keySet()) {
-//			count += (double)docId2Count.get(i);
-//		}
-//		System.out.println(count/docId2Count.size());
-//		
-//		System.exit(0);
+
 		try {
-			File file = new File( "r255zhan-hw4-cosine.txt");
-//			File file = new File( "r255zhan-hw4-bm25-baseline.txt");
+//			File file = new File( "r255zhan-hw4-cosine.txt");
+			File file = new File( "r255zhan-hw4-bm25-baseline.txt");
 //			File file = new File( "r255zhan-hw4-bm25-stemmed.txt");
 	             boolean fvar = file.createNewFile();
 		     if (fvar){
@@ -77,122 +71,11 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 			String line = queries.nextLine();
 			String topic = line.substring(0, 3);
 			line = extractTopic(line);
-//			BM25(topic, line, term2IdLexicon, invertedIndexRead, docId2Count, id2MetaData);
-			cosineSimilarity(topic, line, term2IdLexicon, invertedIndexRead, docId2Count, id2MetaData);
+			BM25(topic, line, term2IdLexicon, invertedIndexRead, docId2Count, id2MetaData);
+//			cosineSimilarity(topic, line, term2IdLexicon, invertedIndexRead, docId2Count, id2MetaData);
 //			System.out.println(queries.nextLine());
 		}
     }
-
-	public static void cosineSimilarity(String topic,
-			String query, 
-			HashMap <String, Integer> term2Id, 
-			HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex,
-			HashMap<Integer, Integer> docId2Count,
-			HashMap<Integer, metaData> id2MetaData) {
-		
-		Map<Integer, Double> accumulator = new HashMap<>();
-		ArrayList<String> queryTerms = tokenize(query);
-		HashMap<String, Integer> queryFreq = new HashMap<>();
-		int n = 247034;
-		double dt = 0;
-		double qt = 1/3;
-		
-		int docId = 0;
-		int nk;
-		
-		
-		double cosineVal = 0;
-
-		for( String term : queryTerms) {
-			
-			int termId = term2Id.get(term);
-			ArrayList<DocIDCountPair> postings = invertedIndex.get(termId);
-			System.out.println("Term: " + term + " query: " + queryTerms.toString());
-			for(DocIDCountPair post: postings) {
-				double dtsquaredSum = 0;
-				double qtsquaredSum = 0;
-				double numerator = 0;
-				docId = post.getDocID();
-//				id = term2Id.get(term);
-				nk = postings.size();
-				dt = calcdt(term2Id, term, post, nk);
-				
-				for(int i = 1; i <=n; i++) {
-					numerator += dt*qt;
-					dtsquaredSum += dt*dt;
-					qtsquaredSum += qt*qt;
-				}
-				
-				cosineVal = numerator/(Math.sqrt(dtsquaredSum*qtsquaredSum));
-				System.out.println("cosineVal: " + cosineVal +
-						"dt: " + dt);
-				
-				
-				if(accumulator.containsKey(docId)) {
-					accumulator.put(docId, accumulator.get(docId) + cosineVal);
-				} else {
-					accumulator.put(docId,cosineVal);
-				}
-			}
-			
-			
-		}
-		Map sortedMap = sortByValue(accumulator);
-		int counter = 1;
-		for( Object i: sortedMap.keySet()) {
-			if(counter == 1001) break;
-			
-			String docno = id2MetaData.get(i).getDocNo();
-			
-			try
-			{
-//				String filename= "r255zhan-hw4-bm25-stemmed.txt";
-				String filename= "r255zhan-hw4-cosine.txt";
-			    FileWriter fw = new FileWriter(filename,true); 
-			    fw.write(topic + " Q0 "+ docno + " " + counter + " " + accumulator.get(i) + " "+ "r255zhan" + "\n");
-			    fw.close();
-			}
-			catch(IOException ioe)
-			{
-			    System.err.println("IOException: " + ioe.getMessage());
-			}
-			counter ++;
-		}
-		
-		
-	}
-	public static double calcdt(
-			HashMap <String, Integer> term2Id,
-			String term,
-			DocIDCountPair post,
-			double nk) {
-		
-		double result = 0;
-		int n = 247034;
-		double N = 131896;
-		double fi = post.getCount();
-		double Logfi = 0;
-		double numerator;
-		if (fi > 0) {
-			Logfi = Math.log(fi) + 1;
-		} 
-		numerator = (Logfi)*(Math.log(N/nk));
-		double rawDenominator = 0;
-		
-		for(int i = 1; i<=n; i ++) {
-			rawDenominator = Logfi*Math.log(N/nk);
-			rawDenominator = rawDenominator*rawDenominator;
-		}
-		double realdenom = Math.sqrt(rawDenominator);
-		
-		
-		
-		return numerator/realdenom;
-	}
-	
-	
-	
-	
 	public static String extractTopic(String line) {
 		return line.substring(3, line.length());
 	}
@@ -284,7 +167,6 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
         }
         return sortedMap;
     }
-
 	public static double calcK(double k1,
 			int docId, 
 			HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex,
@@ -365,7 +247,100 @@ public static void main(String[] argv) throws IOException, ClassNotFoundExceptio
 		}
 		return id2MetaData;
 	}
-	
+	public static void cosineSimilarity(String topic,
+			String query, 
+			HashMap <String, Integer> term2Id, 
+			HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex,
+			HashMap<Integer, Integer> docId2Count,
+			HashMap<Integer, metaData> id2MetaData) {
+		
+		Map<Integer, Double> accumulator = new HashMap<>();
+		ArrayList<String> queryTerms = tokenize(query);
+		HashMap<String, Integer> queryFreq = new HashMap<>();
+		int n = 247034;
+		double dt = 0;
+		double qt = 0.3333333333333;
+		int docId = 0;
+		int nk;
+		double cosineVal = 0;
+		for( String term : queryTerms) {
+			int termId = term2Id.get(term);
+			ArrayList<DocIDCountPair> postings = invertedIndex.get(termId);
+			System.out.println("Term: " + term + " query: " + queryTerms.toString());
+			for(DocIDCountPair post: postings) {
+				double dtsquaredSum = 0;
+				double qtsquaredSum = 0;
+				double numerator = 0;
+				docId = post.getDocID();
+//				id = term2Id.get(term);
+				nk = postings.size();
+				dt = calcdt(term2Id, term, post, nk);
+				
+				for(int i = 1; i <=n; i++) {
+					numerator += dt*qt;
+					dtsquaredSum += dt*dt;
+					qtsquaredSum += qt*qt;
+				}
+				cosineVal = numerator/(Math.sqrt(dtsquaredSum*qtsquaredSum));
+//				System.out.println("cosineVal: " + cosineVal +
+//						" dt: " + dt +
+//						" Numerator: " + numerator + 
+//						" dtsq " + dtsquaredSum + 
+//						" qtsq " + qtsquaredSum);
+				if(accumulator.containsKey(docId)) {
+					accumulator.put(docId, accumulator.get(docId) + cosineVal);
+				} else {
+					accumulator.put(docId,cosineVal);
+				}
+			}
+			
+			
+		}
+		Map sortedMap = sortByValue(accumulator);
+		int counter = 1;
+		for( Object i: sortedMap.keySet()) {
+			if(counter == 1001) break;
+			String docno = id2MetaData.get(i).getDocNo();
+			try
+			{
+//				String filename= "r255zhan-hw4-bm25-stemmed.txt";
+				String filename= "r255zhan-hw4-cosine.txt";
+			    FileWriter fw = new FileWriter(filename,true); 
+			    fw.write(topic + " Q0 "+ docno + " " + counter + " " + accumulator.get(i) + " "+ "r255zhan" + "\n");
+			    fw.close();
+			}
+			catch(IOException ioe)
+			{
+			    System.err.println("IOException: " + ioe.getMessage());
+			}
+			counter ++;
+		}
+	}
+	public static double calcdt(
+			HashMap <String, Integer> term2Id,
+			String term,
+			DocIDCountPair post,
+			double nk) {
+		
+		int n = 247034;
+		double N = 131896;
+		double fi = post.getCount();
+		double Logfi = 0;
+		double numerator;
+		if (fi > 0) {
+			Logfi = Math.log(fi) + 1;
+		} 
+		numerator = (Logfi)*(Math.log(N/nk));
+		double rawDenominator = 0;
+		rawDenominator = Logfi*Math.log(N/nk);
+		double rawDenominatorsquared = rawDenominator*rawDenominator;
+		double realdenom = 0;
+		for(int i = 1; i<=n; i ++) {
+			realdenom += rawDenominatorsquared;
+		}
+		realdenom = Math.sqrt(realdenom);
+		return numerator/realdenom;
+	}
 
 }
 
