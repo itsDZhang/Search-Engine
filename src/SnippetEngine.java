@@ -11,10 +11,13 @@ import java.io.ObjectInputStream;
 import java.io.Reader;
 import java.text.BreakIterator;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -90,8 +93,19 @@ public class SnippetEngine {
 		
 		for(int i : snippetResult.keySet()) {
 			Snippet snip = snippetResult.get(i);
+			Date dateA = new SimpleDateFormat("MMMM").parse(snip.getDate());
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(dateA);
+			String[] dates = snip.getDate().split(" ");
+//			System.out.println(snip.getDate());
+			String year = dates[2].substring(1, dates[2].length());
+			String day = dates[1];
+			int month = cal.get(Calendar.MONTH) + 1;
+			
+			String finalDate = month + "/" + day + "/" +year;
+			
 			System.out.println(i + ". " + snip.getHeadline() + 
-					" (" + snip.getDate() + ")" +"\n  \n "+ snip.getText() + 
+					" (" + finalDate + ")" +"\n  \n "+ snip.getText() + 
 					" (" + snip.getDocno() + ") \n \n -------------- \n ");
 //			System.out.println("---------------End of top 10 ranked----------------");
 		}
@@ -163,7 +177,11 @@ public class SnippetEngine {
 			
 			if(snip.getHeadline().length() <2){
 				String tmpHead = "";
-				for(int i = 0; i<50; i++) {
+				int stopper = 50;
+				if(stopper >= snip.getText().length()) {
+					stopper = snip.getText().length();
+				}
+				for(int i = 0; i<stopper; i++) {
 					char counter = snip.getText().charAt(i);
 					tmpHead +=counter;
 				}
@@ -221,8 +239,8 @@ public class SnippetEngine {
 		
 		Pattern pattern = Pattern.compile("<TEXT>(.+?)</TEXT>");
 		Matcher matcher = pattern.matcher(storage);
-		matcher.find();
-		if(matcher.group(1).length()>0) {
+		
+		if(matcher.find()) {
 			resultA += matcher.group(1);
 		} 
 		

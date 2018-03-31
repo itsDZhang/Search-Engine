@@ -24,7 +24,7 @@ public class GetDoc {
 		String type = "docno";
 //		String DocOrId = "LA043089-0098";
 //		String DocOrId = "LA082089-0008";
-		String DocOrId = "LA101990-0024";
+		String DocOrId = "LA111690-0061";
 //		String type = "id";
 //		String DocOrId = "9755";
 //		The two hashmaps to add
