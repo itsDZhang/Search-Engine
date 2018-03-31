@@ -32,6 +32,8 @@ public class SnippetEngine {
 		// TODO Auto-generated method stub
 		String localPath = "C:/Users/Rui/eclipse-workspace/541/hw5Files";
 		String filesLocalPath = "C:/Users/Rui/eclipse-workspace/541";
+//		localPath = args[0];
+//		filesLocalPath = args[1];
 //		Reading term2Id Lexicon
 		FileInputStream fileRead = new FileInputStream(new File(localPath + "/term2IdLexicon.txt"));
 		ObjectInputStream toRead = new ObjectInputStream(fileRead);
@@ -49,33 +51,99 @@ public class SnippetEngine {
 		System.out.println("Finished Reading. Time: " + LocalDateTime.now());
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
 		doc2Id = generateDoc2IdHash(filesLocalPath);
-		Scanner reader = new Scanner(System.in);
+//		Scanner reader = new Scanner(System.in);
 		
 		boolean quit = false;
 		
 		while(!quit) {
-			String query = reader.nextLine();
 			
+			System.out.println("Please enter a query.");
+			Scanner reader = new Scanner(System.in);
+			String query = reader.nextLine();
+			long startTime = System.currentTimeMillis();
 			if(query.equals("q")) {
 				quit = true;
+				reader.close();
 				break;
 			}
 			ArrayList<String> queryTerms = tokenize(query);
-			
-//			ArrayList<String> tokens = tokenize(query);
-			
-//			System.out.println(tokens.toString());
+			for(String term: queryTerms) {
+				if(!invertedIndexRead.containsKey(term2IdLexicon.get(term))) {
+					System.out.println("The inverted index does not contain that term.");
+					
+				}
+			}
+			LinkedHashMap<Integer, Snippet> snippetResult = new LinkedHashMap<>();
 			ArrayList<String> docnoResult = BM25(query, term2IdLexicon, invertedIndexRead, docId2Count, id2MetaData);
-//			System.out.println(docnoResult.toString());
-			runSnippet(docnoResult, doc2Id, id2MetaData, filesLocalPath, queryTerms);
+			snippetResult = runSnippet(docnoResult, doc2Id, id2MetaData, filesLocalPath, queryTerms);
+			long endTime = System.currentTimeMillis();
+			System.out.println("Total execution time: " + (endTime - startTime) + "milliseconds" );
+			
+			viewSnippets(snippetResult, doc2Id, id2MetaData, filesLocalPath);
+		}
+		
+	}
+	public static void viewSnippets(LinkedHashMap<Integer, Snippet> snippetResult,
+			HashMap<String, Integer> doc2Id, HashMap<Integer, metaData> id2MetaData,
+			String filesPath) throws FileNotFoundException, ParseException {
+		
+		
+		for(int i : snippetResult.keySet()) {
+			Snippet snip = snippetResult.get(i);
+			System.out.println(i + ". " + snip.getHeadline() + 
+					" (" + snip.getDate() + ")" +"\n  \n "+ snip.getText() + 
+					" (" + snip.getDocno() + ") \n \n -------------- \n ");
+//			System.out.println("---------------End of top 10 ranked----------------");
+		}
+		
+		int docRank = 0;
+		boolean check = true;
+		while(check) {
+			System.out.println("Which document would you like to view? Integers only please");
+			System.out.println("If you would like to enter a new query, enter 'b' ");
+			System.out.println("If you would like to quit enter 'q' ");
+			Scanner intake = new Scanner(System.in);
+			String line = intake.nextLine();
+			line = line.trim();
+			if(line.toLowerCase().equals("q")) {
+				System.exit(0);
+			}else if(line.toLowerCase().equals("b")) {
+				break;
+			} else if (!(line.matches("[0-9]+") && line.length() > 0)) {
+				System.out.println("You have inputted a wrong value, please try again.");
+			} else if( (Integer.parseInt(line) > 0) && (Integer.parseInt(line) <=10)) {
+				docRank = Integer.parseInt(line);
+				Snippet docu2get = snippetResult.get(docRank);
+				String docno = docu2get.getDocno();
+				metaData testA = id2MetaData.get(doc2Id.get(docno));
+				String date = getDateNum(docno);
+				Scanner text = new Scanner( 
+						new FileReader(filesPath + "/filesToBeStored/" + date + "/" + 
+								doc2Id.get(docno) + ".txt"));
+				while(text.hasNextLine()) {
+					System.out.println(text.nextLine());
+					
+				}
+				System.out.println("==========End of Document==========");
+			} 
+//			else if( checkForCharAndDigits(line) ){
+//			}
+			else {
+				System.out.println("You have inputted a wrong value, please try again.");
+			}
+			
+			
 			
 		}
 		
+//		intake.close();
 		
-		reader.close();
+		
+		return;
+		
 		
 	}
-	public static void runSnippet(ArrayList<String> docnoResult,
+	public static LinkedHashMap<Integer, Snippet> runSnippet(ArrayList<String> docnoResult,
 			HashMap<String, Integer> doc2Id, 
 			HashMap<Integer, metaData> id2MetaData, 
 			String filesLocalPath, 
@@ -89,7 +157,7 @@ public class SnippetEngine {
 		}
 	
 		
-		
+		LinkedHashMap<Integer, Snippet> snippetResult = new LinkedHashMap<>();
 		int rank =1;
 		for(Snippet snip: snippets) {
 			
@@ -102,13 +170,15 @@ public class SnippetEngine {
 				snip.setHeadline(tmpHead);
 			}
 			
+			snippetResult.put(rank,snip);
 			
-			System.out.println(rank + " " + snip.getHeadline() + " (" + snip.getDate() + ")");
-			System.out.println(snip.getText() + " (" + snip.getDocno() + ")");
-			
+//			System.out.println(rank + ". " + snip.getHeadline() + 
+//					" (" + snip.getDate() + ")" +"\n"+ snip.getText() + 
+//					" (" + snip.getDocno() + ")");
+			rank ++;
 		}
 		
-		
+		return snippetResult;
 		
 	}
 
@@ -131,11 +201,12 @@ public class SnippetEngine {
 //		System.out.println("Headline: " + testA.getHeadline());
 //		System.out.println("Date: " +testA.getDate());
 //		System.out.println("Raw Document: ");
+		String snip = "";
 		while(text.hasNextLine()) {
 			storage += text.nextLine();
 		}
+		snip = extractSnippet(storage, queryTerms);
 		
-		String snip = extractSnippet(storage, queryTerms);
 		Snippet tmpSnip = new Snippet(snip, testA.getHeadline(), testA.getDate(), docno);
 		
 		
@@ -145,56 +216,57 @@ public class SnippetEngine {
 	}
 //	Tokenize
 	public static String extractSnippet(String storage, ArrayList<String> queryTerms) {
-		String rawText = "";
-		int startPosition = 0;
-		int endPosition = 0;
-		if(storage.contains("</TEXT>")) {
-			startPosition = storage.indexOf("<TEXT>") + "<TEXT>".length();
-			endPosition = storage.indexOf("</TEXT>", startPosition);
-			rawText = storage.substring(startPosition, endPosition).trim();
-		}
+		String resultA = "";
+		String resultB = "";
+		
+		Pattern pattern = Pattern.compile("<TEXT>(.+?)</TEXT>");
+		Matcher matcher = pattern.matcher(storage);
+		matcher.find();
+		if(matcher.group(1).length()>0) {
+			resultA += matcher.group(1);
+		} 
 		
 		if(storage.contains("</GRAPHIC>")) {
-			startPosition = storage.indexOf("<GRAPHIC>") + "<GRAPHIC>".length();
-			endPosition = storage.indexOf("</GRAPHIC>", startPosition);
-			rawText += storage.substring(startPosition, endPosition).trim();
-		}
-		if(rawText.contains("</P>")) {
-			rawText = rawText.replaceAll("<P>", "");
-			rawText = rawText.replaceAll("</P>", "");
+			pattern = Pattern.compile("<GRAPHIC>(.+?)</GRAPHIC>");
+			matcher = pattern.matcher(storage);
+			matcher.find();
+			resultB += matcher.group(1);
+			
 		}
 		
+		String rawText = resultA + resultB;
+		rawText = rawText.replaceAll("<.*?>", "");
 		String snip = extractSnipFromSentence(rawText, queryTerms);
-		
-		
 		return snip;
 	}
 	
 	public static String extractSnipFromSentence(String Twosnip, ArrayList<String> queryTerms) {
 		String result = "";
-		ArrayList<String> sentences = new ArrayList<>();
-		BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);
-		iterator.setText(Twosnip);
-		int start = iterator.first();
-		for (int end = iterator.next();
-		    end != BreakIterator.DONE;
-		    start = end, end = iterator.next()) {
-			sentences.add(Twosnip.substring(start,end));
-		}
+//		System.out.println("Entering this?");
+		String[] sentences = Twosnip.split("\\.|\\?|\\!");
 		
 		for(String sentence : sentences) {
+			
 			for(String term: queryTerms) {
-				if(sentence.contains(term)) {
-					result += sentence;
+				String loweredSen = sentence.toLowerCase();
+				String loweredTerm = term.toLowerCase();
+				if(loweredSen.contains(loweredTerm)) {
+					result +=  sentence + " ";
+					break;
 				}
 			}
 			
 		}
+		
+//		System.out.println("resulting sentences: " + result);
 		String finalResult = "";
-		for(int i=0; i<345; i++) {
-			char tmp = result.charAt(i);
-			finalResult+=tmp;
+		if(result.length() <= 346) {
+			finalResult = result;
+		}else {
+			finalResult = result.substring(0,345);
 		}
+//		System.out.println("resulting sentences: " + result);
+		
 		finalResult += "...";
 		return finalResult;
 	}

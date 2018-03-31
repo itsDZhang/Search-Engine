@@ -8,6 +8,7 @@ public class Snippet {
 		this.text = text;
 		this.headline = headline;
 		this.date = date;
+		this.docno = docno;
 	}
 	public String getDocno() {
 		return this.docno;
