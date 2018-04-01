@@ -268,7 +268,10 @@ public class SnippetEngine {
 			for(String term: queryTerms) {
 				String loweredSen = sentence.toLowerCase();
 				String loweredTerm = term.toLowerCase();
-				if(loweredSen.contains(loweredTerm)) {
+				String pattern = "\\b"+loweredTerm+"\\b";
+		         Pattern p=Pattern.compile(pattern);
+		         Matcher m=p.matcher(loweredSen);
+				if(m.find()) {
 					result +=  sentence + " ";
 					break;
 				}
