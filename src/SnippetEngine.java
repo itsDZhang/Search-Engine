@@ -114,14 +114,14 @@ public class SnippetEngine {
 		boolean check = true;
 		while(check) {
 			System.out.println("Which document would you like to view? Integers only please");
-			System.out.println("If you would like to enter a new query, enter 'b' ");
+			System.out.println("If you would like to enter a new query, enter 'n' ");
 			System.out.println("If you would like to quit enter 'q' ");
 			Scanner intake = new Scanner(System.in);
 			String line = intake.nextLine();
 			line = line.trim();
 			if(line.toLowerCase().equals("q")) {
 				System.exit(0);
-			}else if(line.toLowerCase().equals("b")) {
+			}else if(line.toLowerCase().equals("n")) {
 				break;
 			} else if (!(line.matches("[0-9]+") && line.length() > 0)) {
 				System.out.println("You have inputted a wrong value, please try again.");
@@ -249,7 +249,8 @@ public class SnippetEngine {
 			matcher = pattern.matcher(storage);
 			matcher.find();
 			resultB += matcher.group(1);
-			
+//			System.out.println();
+//			System.out.println();
 		}
 		
 		String rawText = resultA + resultB;
@@ -264,6 +265,7 @@ public class SnippetEngine {
 		String[] sentences = Twosnip.split("\\.|\\?|\\!");
 		
 		for(String sentence : sentences) {
+			
 			
 			for(String term: queryTerms) {
 				String loweredSen = sentence.toLowerCase();
