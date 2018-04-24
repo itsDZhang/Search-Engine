@@ -1,12 +1,9 @@
 # Search Engine
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=zCIvku1lT9s
-" target="_blank"><img src="http://img.youtube.com/vi/zCIvku1lT9s/0.jpg" 
-alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/zCIvku1lT9s/0.jpg)](http://www.youtube.com/watch?v=zCIvku1lT9s)
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=YlrLvLgVzqk
-" target="_blank"><img src="http://img.youtube.com/vi/YlrLvLgVzqk/0.jpg" 
-alt="IMAGE ALT TEXT HERE" width="240" height="" border="10" /></a>
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/YlrLvLgVzqk/0.jpg)](http://www.youtube.com/watch?v=YlrLvLgVzqk)
+
 
 This is a minified search engine that specializes in discovering the top 10 most relevant documents in the Los Angeles Times Collection. The collection has 136k+ documents but this search engine's performance can retrieve those relevant documents in several milliseconds. 
 
