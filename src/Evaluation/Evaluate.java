@@ -1,5 +1,5 @@
 package Evaluation;
-import java.io.*; 
+import java.io.*;
 import java.util.*;
 
 import Evaluation.Results.Result;
@@ -8,14 +8,14 @@ public class Evaluate {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		
+
 		String qrels = "C:/Users/Rui/eclipse-workspace/541/hw3Files/LA-only.trec8-401.450.minus416-423-437-444-447.txt";
 		String topics = "C:/Users/Rui/eclipse-workspace/541/hw3Files/topics.401-450.txt";
 //		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/student2.results";
 //		String resultFile = "C:\\Users\\Rui\\eclipse-workspace\\541\\hw4Files/r255zhan-hw4-bm25-baseline.txt";
 		String resultFile = "C:\\Users\\Rui\\eclipse-workspace\\541\\hw4Files/r255zhan-hw4-bm25-stemmed.txt";
 //		String resultFile = "C:/Users/Rui/eclipse-workspace/541/hw3Files/results-files/r255zhan-hw2-results.results";
-		String metaDataPath = "C:/Users/Rui/eclipse-workspace/541/hw3Files/id2MetaData.txt";	
+		String metaDataPath = "C:/Users/Rui/eclipse-workspace/541/hw3Files/id2MetaData.txt";
 		try {
 			File file = new File("student2.results");
 	             boolean fvar = file.createNewFile();
@@ -60,9 +60,7 @@ public class Evaluate {
 			double DofTk =0;
 			queryResult = query2Result.get(topic);
 			reldocnos = topic2RelDocnos.get(topic);
-//			int delete = 0;
 			for(Result result : queryResult) {
-//				System.out.println(delete++);
 				String docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
 					int rank = result.getRank();
@@ -75,12 +73,12 @@ public class Evaluate {
 				}
 			}
 			TBGList.add(TBG);
-//			
+//
 			try
 			{
 				String filename= "student2.results";
 //			    String filename= "r255zhan-hw2-results.results";
-			    FileWriter fw = new FileWriter(filename,true); 
+			    FileWriter fw = new FileWriter(filename,true);
 			    fw.write("TBG \t\t" + topic + "\t\t" + TBG+ "\n");
 			    fw.close();
 			}
@@ -98,22 +96,21 @@ public class Evaluate {
 
 	}
 	public static double calcTimeofK(
-									HashMap<String, 
-									Integer> docno2Count, 
+									HashMap<String,
+									Integer> docno2Count,
 									int currentRank,
 									ArrayList<Result> queryResult,
 									ArrayList<String> reldocnos) {
-		
+
 		double TofK =0;
 		int tmpRank = 0;
-		
+
 		for(Result result: queryResult) {
 			tmpRank = result.getRank();
 			if(tmpRank >= currentRank) {
 				break;
 			}
 			String docno = result.getDocID();
-//			System.out.println(docno);
 			double docLength = docno2Count.get(docno);
 			if(reldocnos.contains(docno)) {
 				TofK += (4.4 + ((0.018*(docLength) + 7.8) * 0.64));
@@ -145,7 +142,7 @@ public class Evaluate {
 	public static ArrayList<Double> calcNdcg1000(String resultFile, String qrels) throws Exception {
 		ResultsFile resultsRaw = new ResultsFile(resultFile);
 		qRels qrelsList = new qRels(qrels);
-		
+
 		Results results = resultsRaw.results;
 		ArrayList<Result> queryResult = new ArrayList<>();
 		ArrayList<String> topicIds = results.QueryIDs();
@@ -154,7 +151,7 @@ public class Evaluate {
 		RelevanceJudgements relDocs = qrelsList.judgements;
 		ArrayList<String> reldocnos = new ArrayList<>();
 		ArrayList<Double> ndcgList = new ArrayList<>();
-		
+
 		for(String topicNum : topicIds) {
 			queryResult = results.QueryResults(topicNum);
 			query2Result.put(topicNum, queryResult);
@@ -162,7 +159,7 @@ public class Evaluate {
 		}
 		Collections.sort(topicIds);
 		double ndcg = 0;
-		
+
 		for(String topic : topicIds) {
 			int breaker = 0;
 			double dcg = 0;
@@ -178,7 +175,7 @@ public class Evaluate {
 				docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
 					dcg += (1/(Math.log(result.getRank() + 1)/Math.log(2)));
-					
+
 				}
 			}
 			ndcg = dcg/idcg;
@@ -187,7 +184,7 @@ public class Evaluate {
 			{
 				String filename= "student2.results";
 //			    String filename= "r255zhan-hw2-results.results";
-			    FileWriter fw = new FileWriter(filename,true); 
+			    FileWriter fw = new FileWriter(filename,true);
 			    fw.write("ndcg@1000 \t\t" + topic + "\t\t" + ndcg+ "\n");
 			    fw.close();
 			}
@@ -203,7 +200,7 @@ public class Evaluate {
 		System.out.println(tmp/ndcgList.size());
 		return ndcgList;
 	}
-	
+
 	public static ArrayList<Double> calcNdcg10(String resultFile, String qrels) throws Exception {
 		ResultsFile resultsRaw = new ResultsFile(resultFile);
 		qRels qrelsList = new qRels(qrels);
@@ -238,28 +235,24 @@ public class Evaluate {
 			int stop = 10;
 			if(stop>queryResult.size()) {
 				stop = queryResult.size();
-				
+
 			}
 			for(int breaker=1; breaker<=stop; breaker++ ) {
 				Result result = queryResult.get(breaker-1);
 				docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
-//					System.out.println("rank: " + result.getRank());
-//					System.out.println(breaker);
 					dcg += (1/(Math.log(result.getRank() + 1)/Math.log(2)));
 				}
 			}
-			
+
 			ndcg = dcg/idcg;
-//			System.out.println(topic + " NDCG@10: " + ndcg);
 			ndcgList.add(ndcg);
-			
-			
+
+
 			try
 			{
-//				String filename= "r255zhan-hw2-results.results";
 			    String filename= "student2.results";
-			    FileWriter fw = new FileWriter(filename,true); 
+			    FileWriter fw = new FileWriter(filename,true);
 			    fw.write("ndcg@10 \t\t" + topic + "\t\t" + ndcg+ "\n");
 			    fw.close();
 			}
@@ -275,7 +268,7 @@ public class Evaluate {
 		System.out.println(tmp/ndcgList.size());
 		return ndcgList;
 	}
-	
+
 	public static ArrayList<Double> calcPrecisionAt10(String resultFile, String qrels) throws Exception {
 		ResultsFile resultsRaw = new ResultsFile(resultFile);
 		Results results = resultsRaw.results;
@@ -293,7 +286,7 @@ public class Evaluate {
 			topic2RelDocnos.put(topicNum, relDocs.getRelDocnos(topicNum));
 		}
 		Collections.sort(topicIds);
-		
+
 		for(String topic : topicIds) {
 			queryResult = query2Result.get(topic);
 			reldocnos = topic2RelDocnos.get(topic);
@@ -301,14 +294,12 @@ public class Evaluate {
 			double counter = 0.0;
 			double rank = 10.0;
 			String docno = "";
-//			System.out.println(topic);
 			int stop = 10;
 			if(stop>queryResult.size()) {
 				stop = queryResult.size();
 				rank = queryResult.size();
 			}
 			for(int breaker=0; breaker<stop; breaker++ ) {
-//				System.out.println("QueryResult: " + );
 				Result result = queryResult.get(breaker);
 				docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
@@ -319,9 +310,8 @@ public class Evaluate {
 			avgScores.add(precision);
 			try
 			{
-//				String filename= "r255zhan-hw2-results.results";
 			    String filename= "student2.results";
-			    FileWriter fw = new FileWriter(filename,true); 
+			    FileWriter fw = new FileWriter(filename,true);
 			    fw.write("Precision@10 \t\t" + topic + "\t\t" + precision + "\n");
 			    fw.close();
 			}
@@ -336,9 +326,9 @@ public class Evaluate {
 		}
 		System.out.println(tmp/avgScores.size());
 		return avgScores;
-		
+
 	}
-	
+
 	public static ArrayList<Double> calcMeanAveragePrecision(String resultFile, String qrels) throws Exception {
 		ResultsFile resultsRaw = new ResultsFile(resultFile);
 		Results results = resultsRaw.results;
@@ -367,7 +357,7 @@ public class Evaluate {
 			double rank = 0.0;
 			double sum = 0.0;
 			String docno = "";
-			
+
 			for( Result result : queryResult) {
 				docno = result.getDocID();
 				if(reldocnos.contains(docno)) {
@@ -382,7 +372,7 @@ public class Evaluate {
 			{
 //				String filename= "r255zhan-hw2-results.results";
 			    String filename= "student2.results";
-			    FileWriter fw = new FileWriter(filename,true); 
+			    FileWriter fw = new FileWriter(filename,true);
 			    fw.write("AP \t\t" + topic + "\t\t" + (sum/reldocnos.size()) + "\n");
 			    fw.close();
 			}

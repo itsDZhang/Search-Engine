@@ -18,16 +18,9 @@ public class GetDoc {
 //			System.out.println("Third Arguement: either the internal integer id or the document's docno");
 //			System.exit(0);
 //		}
-//		String currentDir = System.getProperty("user.dir");
-//		System.out.println(currentDir);
 		String localPath = "C:/Users/Rui/eclipse-workspace/541";
 		String type = "docno";
-//		String DocOrId = "LA043089-0098";
-//		String DocOrId = "LA082089-0008";
 		String DocOrId = "LA111690-0061";
-//		String type = "id";
-//		String DocOrId = "9755";
-//		The two hashmaps to add
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
 		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
 		doc2Id = generateDoc2IdHash(localPath);
@@ -43,8 +36,8 @@ public class GetDoc {
 	public static void runAsId(HashMap<Integer, metaData> id2MetaData, int searchId, String localPath) throws FileNotFoundException, ParseException {
 		metaData testB = id2MetaData.get(searchId);
 		String date = getDateNum(testB.getDocNo());
-		Scanner text = new Scanner( 
-				new FileReader(localPath + "/filesToBeStored/" + date + "/" + 
+		Scanner text = new Scanner(
+				new FileReader(localPath + "/filesToBeStored/" + date + "/" +
 						searchId + ".txt"));
 		System.out.println("DocNo: " + testB.getDocNo());
 		System.out.println("Internal Id: " + testB.getId());
@@ -55,14 +48,14 @@ public class GetDoc {
 			System.out.println(text.nextLine());
 		}
 	}
-//	This method will activate if user is searching by docno 
+//	This method will activate if user is searching by docno
 	public static void runAsDocNo(HashMap<String, Integer> doc2Id, HashMap<Integer, metaData> id2MetaData, String searchString, String localPath) throws ParseException, FileNotFoundException {
 		metaData testA = id2MetaData.get(doc2Id.get(searchString));
 		String date = getDateNum(searchString);
-		Scanner text = new Scanner( 
-				new FileReader(localPath + "/filesToBeStored/" + date + "/" + 
+		Scanner text = new Scanner(
+				new FileReader(localPath + "/filesToBeStored/" + date + "/" +
 						doc2Id.get(searchString) + ".txt"));
-		
+
 		System.out.println("DocNo: " + testA.getDocNo());
 		System.out.println("Internal Id: " + testA.getId());
 		System.out.println("Headline: " + testA.getHeadline());
@@ -72,7 +65,7 @@ public class GetDoc {
 			System.out.println(text.nextLine());
 		}
 	}
-	
+
 //	This method grabs the docno to id txt file, reads the file and populates it
 	public static HashMap<String, Integer> generateDoc2IdHash(String localPath) throws FileNotFoundException {
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
@@ -80,15 +73,13 @@ public class GetDoc {
 		while(docno2idtxt.hasNextLine()) {
 			String nextLine = docno2idtxt.nextLine();
 			String[] nextLineArr = nextLine.split("\\|");
-//			System.out.println(nextLine);
 			String key = nextLineArr[0];
 			int value = Integer.parseInt(nextLineArr[1]);
 			doc2Id.put(key, value);
-//			System.out.println(docno2idtxt.next());
 		}
 		return doc2Id;
 	}
-//	This method grabs the id to metadata txt file, reads it, and populates the hashmap	
+//	This method grabs the id to metadata txt file, reads it, and populates the hashmap
 	public static HashMap<Integer, metaData> generateid2MetaDataHash(String localPath) throws FileNotFoundException {
 		HashMap<Integer, metaData> id2MetaData = new HashMap<Integer, metaData>();
 		Scanner id2MetaDatatxt = new Scanner(new FileReader(localPath +"/index/id2MetaData.txt"));

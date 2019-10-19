@@ -8,10 +8,9 @@ import java.util.regex.Pattern;
 
 public class BM25Main {
 	public static void main(String[] argv) throws IOException, ClassNotFoundException{
-		
+
 		String localPath = "C:/Users/Rui/eclipse-workspace/541/hw4Files";
-//		String localPathQueries = args[0]+"/" +args[1];
-////		the path of where you would store your output file
+//		the path of where you would store your output file
 		String localPathOutputFileToStore = localPath + "/results";
 //		Reading inverted Index
 		InputStream fileStream = new FileInputStream(new File(localPath + "/topics.401-450.txt"));
@@ -32,29 +31,23 @@ public class BM25Main {
 		HashMap <String, Integer> term2IdLexicon =  (HashMap<String, Integer>) toRead.readObject();
 		System.out.println("Read Everything");
 //		Reading the metaData
-		
-//	    String word = "running" ;
-//		String stem = PorterStemmer.stem(word);
-//		System.out.println(word + " -> " + stem);
-		
-		
 		while(queries.hasNextLine()) {
 			BM25(queries.nextLine(), term2IdLexicon, invertedIndexRead, docId2Count);
-			
+
 			System.out.println(queries.nextLine());
 		}
-		
+
     }
-	
+
 	public static void BM25(
-			String query, 
-			HashMap <String, Integer> term2Id, 
+			String query,
+			HashMap <String, Integer> term2Id,
 			HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex,
 			HashMap<Integer, Integer> docId2Count) {
 		double k1 = 1.2;
 		double k2 = 7;
 		double k;
-		double tf4Doc, tf4Query, logVal, numofRelDocs, id, qfi, fi = 0; 
+		double tf4Doc, tf4Query, logVal, numofRelDocs, id, qfi, fi = 0;
 		double sumOfIterations =0;
 		int numOfDocs = 131896;
 		int docId = 0;
@@ -66,49 +59,39 @@ public class BM25Main {
 			} else {
 				queryFreq.put(term,1);
 			}
-			
+
 		}
-		
-		
+
+
 		for( String term : queryTerms) {
 			int termId = term2Id.get(term);
 			ArrayList<DocIDCountPair> postings = invertedIndex.get(termId);
 			System.out.println(queryTerms.toString());
 			for(DocIDCountPair post: postings) {
 				docId = post.getDocID();
-//				id = term2Id.get(term);
 				numofRelDocs = postings.size();
 				logVal = Math.log((numOfDocs - numofRelDocs + 0.5)/(numofRelDocs+0.5));
 				qfi = queryFreq.get(term);
 				tf4Query = (((k2+1)*qfi)/(k2+qfi));
-				
+
 				k = calcK(k1,docId, invertedIndex, term2Id,term, docId2Count);
-				
-//				int termId = term2Id.get(term);
-//				ArrayList<DocIDCountPair> postings = invertedIndex.get(termId);
-//				for(DocIDCountPair posttmp: postings) {
-//					int docTmpId = posttmp.getDocID();
-//					if(docTmpId == docId) {
-//						fi = post.getCount();
-//						break;
-//					}
-//				}
+
 				fi = post.getCount();
 				tf4Doc = ((k1 + 1)*fi)/(k+fi);
 				sumOfIterations += tf4Doc + tf4Query + logVal;
-				
+
 				System.out.println("DocId: " + docId + " " + "BM25: " + sumOfIterations);
 			}
-			
-			
+
+
 		}
-				
+
 	}
-	
+
 	public static double calcK(double k1,
-			int docId, 
+			int docId,
 			HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex,
-			HashMap <String, Integer> term2Id, 
+			HashMap <String, Integer> term2Id,
 			String term,
 			HashMap<Integer, Integer> docId2Count) {
 		double k =0;
@@ -118,16 +101,16 @@ public class BM25Main {
 		int termId = term2Id.get(term);
 		dl = docId2Count.get(docId);
 		ArrayList<DocIDCountPair> postings = invertedIndex.get(termId);
-		
+
 		for(DocIDCountPair post: postings) {
 			int tmpDocId = post.getDocID();
 			int docLenCount = docId2Count.get(tmpDocId);
 			avgdl+=docLenCount;
 		}
 		avgdl = avgdl/postings.size();
-		
+
 		k = k1*((1-b)+ b*(dl/avgdl));
-		
+
 		return k;
 	}
 	public static HashMap<Integer, Integer> docID2docCount(String metaDataPath) throws FileNotFoundException {
@@ -151,7 +134,7 @@ public class BM25Main {
 		ArrayList<String> tokens = new ArrayList<String>();
 		int start = 0;
 		int i =0;
-		
+
 		for (i=0;i<text.length();++i) {
 			String c = text.substring(i, i+1);
 			if(  checkForCharAndDigits(c) ) {
@@ -172,8 +155,4 @@ public class BM25Main {
         if (m.find()) return true;
         else          return false;
     }
-	
-	
-	
 }
-

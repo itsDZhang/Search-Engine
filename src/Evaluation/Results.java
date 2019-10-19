@@ -8,11 +8,11 @@ import java.util.HashMap;
 public class Results {
 //	implements comparable
 	public class Result implements Comparable<Result>  {
-		
+
 		private String docID = "";
 		private double score = 0;
 		private int rank = 0;
-		
+
 		public Result(String docID, double score, int rank) {
 			this.docID = docID;
 			this.score = score;
@@ -43,7 +43,7 @@ public class Results {
 	private HashMap<String, String> tupleKeys = new HashMap<>();
 	private HashMap<String, ArrayList<Result>> query2results = new HashMap<>();
 	private HashMap<String, Boolean> query2isSorted = new HashMap<>();
-	
+
 	public Results() {
 		tupleKeys = new HashMap<>();
 		query2results = new HashMap<>();
@@ -56,7 +56,7 @@ public class Results {
 			throw new Exception("Cannot have duplicate queryID and docID data points");
 		}
 		this.tupleKeys.put(key, null);
-		
+
 		ArrayList<Result> results = null;
 		if( this.query2results.containsKey(queryID)) {
 			results = (ArrayList) this.query2results.get(queryID);
@@ -64,21 +64,20 @@ public class Results {
 			results = new ArrayList<>();
 			this.query2results.put(queryID, results);
 			this.query2isSorted.put(queryID, false);
-			
+
 		}
-//		System.out.println("score: " + score);
 		Result result = new Result(docID, score, rank);
 		results.add(result);
-		
+
 //		added since these hashmaps don't get updated
 		this.query2results.put(queryID, results);
 		this.query2isSorted.put(queryID, false);
-		
+
 	}
 	public String GenerateTupleKey(String queryID, String docID) {
 		return queryID + "-" + docID;
 	}
-	
+
 	public ArrayList<Result> QueryResults(String queryID) throws Exception{
 		if(!this.query2results.containsKey(queryID)) {
 			throw new Exception("No such queryID in results");
@@ -91,7 +90,6 @@ public class Results {
 		}
 		return results;
 	}
-//	Might not work
 	public ArrayList<String> QueryIDs() {
 		ArrayList<String> keySet = new ArrayList<>();
 		for( String i : this.query2results.keySet()) {
@@ -102,9 +100,5 @@ public class Results {
 	public Boolean queryIDExists(String queryID) {
 		return this.query2results.containsKey(queryID);
 	}
-	
-	
-	
-	
 
 }

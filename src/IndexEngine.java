@@ -27,11 +27,9 @@ import java.util.zip.GZIPInputStream;
 //import metaData.java;
 
 public class IndexEngine {
-	
+
 	public static void main(String[] args) throws IOException, ParseException, ClassNotFoundException {
-		
-//		String currentDir = System.getProperty("user.dir");
-//		System.out.println(currentDir);
+
 		if(args.length < 2) {
 			System.out.println("You did not input sufficient arguements. This program must accept two arguements");
 			System.out.println("First Arguement: a path to the latimes.gz file");
@@ -40,16 +38,9 @@ public class IndexEngine {
 		}
 		String localPathGzip = args[0];
 		String localPathProcess = args[1];
-//		String localPathProcess = "C:/Users/Rui/eclipse-workspace/541";
-//		String localPathGzip = "C:/Users/Rui/eclipse-workspace/541/latimes.gz";
-//		File results = new File(localPathProcess + "/filesToBeStored");
-//		if ( results.exists()) {
-//			System.out.println("The directory "+ "filesToBeStored" + " already exists.");
-//	    	System.exit(0);
-//		}
 		readAndProcess(localPathGzip, localPathProcess);
 	}
-	
+
 	public static void readAndProcess(String localPathGzip, String localPathProcess) throws IOException, ParseException, ClassNotFoundException{
 //		Reads the zip file
 		File latimesFile = new File(localPathGzip);
@@ -58,7 +49,7 @@ public class IndexEngine {
 		Reader decoder = new InputStreamReader(gzipStream);
 		BufferedReader buffered = new BufferedReader(decoder);
 		Scanner data = new Scanner(buffered);
-		
+
 //		Scanner data = new Scanner(new FileReader(localPathGzip));
 		//initializes the first two hashmaps
 		HashMap<String, Integer> doc2Id = new HashMap<String, Integer>();
@@ -68,57 +59,50 @@ public class IndexEngine {
 		ArrayList<String> storage4File = new ArrayList<String>();
 //		Setting an temp storage
 		String storage4Data = "";
-		
+
 		HashMap <String,Integer> term2IdLexicon = new HashMap<>();
 		HashMap <Integer, String> id2TermLexicon = new HashMap<>();
 		HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex = new HashMap<>();
-		
-//		int toDelete = 0;
-//		for(int i = 0; i <100000; i ++) {
+
 		while(data.hasNextLine()) {
 			line = data.nextLine();
 			storage4Data += line;
 			storage4File.add(line);
-//			System.out.println(line);
 //			Populating the temp stroage until the </doc> tag gets hit
 			if(line.contains("</DOC>")) {
 				ArrayList<String> tokens = extractTokens(storage4Data);
 				tokenIdLexicon data4tokensLexicon = convertTokens2Ids(tokens, term2IdLexicon, id2TermLexicon);
 				HashMap <String,Integer> term2IdTemp = data4tokensLexicon.getTerm2IdLexicon();
-				
+
 				for(String j: term2IdTemp.keySet()) {
 					if(!term2IdLexicon.containsKey(j)) {
 						term2IdLexicon.put(j, term2IdTemp.get(j));
 					}
 				}
-				
+
 				ArrayList<Integer> tokenIds = data4tokensLexicon.getTokens();
 				HashMap<Integer, Integer> wordCounts = countWords(tokenIds);
 				invertedIndex= add2Posting(wordCounts, internalId, invertedIndex);
-				
-//				System.out.println("Size " + tokens.size());
-				
+
 //				ArrayList<String> tokens = extractTokens(storage4Data);
 //				grabs the current file, gets the id, docno, metadata
 //				and puts them into its hashmaps and makes a file
-				id2MetaData.put(internalId, getMetaData(storage4Data, internalId)); 
+				id2MetaData.put(internalId, getMetaData(storage4Data, internalId));
 				doc2Id.put(getDocNo(storage4Data),internalId);
-				
-//				makeFile(storage4File, internalId, storage4Data, localPathProcess);
-				
+
 //				Clears the temp story for the next file
 				storage4Data = "";
 				storage4File = new ArrayList<String>();
 				internalId +=1;
 			}
-			
+
 		}
-		
+
 		id2TermLexicon = reverseHashMap(term2IdLexicon);
 		saveHashMap2File(doc2Id, id2MetaData, localPathProcess);
 		saveInvertedIndexLexicon(invertedIndex, id2TermLexicon, term2IdLexicon, localPathProcess);
 		buffered.close();
-		
+
 	}
 	public static HashMap<Integer,String> reverseHashMap(HashMap<String,Integer> map) {
 	    HashMap<Integer, String> rev = new HashMap<>();
@@ -126,36 +110,31 @@ public class IndexEngine {
 	        rev.put(entry.getValue(), entry.getKey());
 	    return rev;
 	}
-	public static void saveInvertedIndexLexicon(HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex, 
-		HashMap <Integer, String> id2TermLexicon, 
+	public static void saveInvertedIndexLexicon(HashMap<Integer, ArrayList<DocIDCountPair>>  invertedIndex,
+		HashMap <Integer, String> id2TermLexicon,
 		HashMap <String,Integer> term2IdLexicon, String localPathProcess) throws IOException, ClassNotFoundException {
 		File directory = new File("index");
 	    if (! directory.exists()){
 	        directory.mkdir();
 	    }
 //		Writing inverted index
-//	    FileOutputStream file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/invertedIndex.txt"));
-//	    FileOutputStream file = new FileOutputStream(new File(localPathProcess + "/index/invertedIndex.txt"));
 		FileOutputStream file = new FileOutputStream(new File(localPathProcess + "/index/invertedIndexStemmed.txt"));
 		ObjectOutputStream toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(invertedIndex);
 //		Writing id 2 term lexicon
-//		file = new FileOutputStream(new File(localPathProcess + "/index/id2TermLexicon.txt"));
 		file = new FileOutputStream(new File(localPathProcess + "/index/id2TermLexiconStemmed.txt"));
-//		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/id2TermLexicon.txt"));
 		toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(id2TermLexicon);
 //		Writing term 2 id lexicon
-//		file = new FileOutputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/term2IdLexicon.txt"));
-//		file = new FileOutputStream(new File(localPathProcess + "/index/term2IdLexicon.txt"));
 		file = new FileOutputStream(new File(localPathProcess + "/index/term2IdLexiconStemmed.txt"));
 		toWrite = new ObjectOutputStream(file);
 		toWrite.writeObject(term2IdLexicon);
-		
+
 		file.close();
 		toWrite.close();
-		
+
 //		Reading inverted Index
+// ==============================================================================================================
 //		FileInputStream fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/index/invertedIndex.txt"));
 //		FileInputStream fileRead = new FileInputStream(new File("C:/Users/Rui/eclipse-workspace/541-Hw1/testCollection/invertedIndex.txt"));
 //		ObjectInputStream toRead = new ObjectInputStream(fileRead);
@@ -219,7 +198,6 @@ public class IndexEngine {
 	}
 	public static HashMap<Integer, ArrayList<DocIDCountPair>> add2Posting(HashMap<Integer, Integer> wordCount, int docId, HashMap<Integer, ArrayList<DocIDCountPair>> invertedIndex) {
 		for (int termId: wordCount.keySet()) {
-//			System.out.println(termId);
 			ArrayList<DocIDCountPair> postings = new ArrayList<>();
 			int count = wordCount.get(termId);
 			if (invertedIndex.containsKey(termId)) {
@@ -228,15 +206,13 @@ public class IndexEngine {
 				postings = new ArrayList<DocIDCountPair>();
 				invertedIndex.put(termId, postings);
 			}
-//			System.out.println("termId: " + termId + " docId: " + docId + " Count: " + count);
 			DocIDCountPair temp = new DocIDCountPair(docId,count);
 			postings.add(temp);
 			invertedIndex.put(termId,postings);
 		}
-//		System.out.println("-----------------------------------------------");
 		return invertedIndex;
 	}
-	
+
 //	Tokenize
 	public static ArrayList<String> extractTokens(String storage) {
 		String rawText = "";
@@ -247,7 +223,7 @@ public class IndexEngine {
 			endPosition = storage.indexOf("</TEXT>", startPosition);
 			rawText = storage.substring(startPosition, endPosition).trim();
 		}
-		
+
 		if(storage.contains("</HEADLINE>")) {
 			startPosition = storage.indexOf("<HEADLINE>") + "<HEADLINE>".length();
 			endPosition = storage.indexOf("</HEADLINE>", startPosition);
@@ -273,7 +249,7 @@ public class IndexEngine {
 		ArrayList<String> tokens = new ArrayList<String>();
 		int start = 0;
 		int i =0;
-		
+
 		for (i=0;i<text.length();++i) {
 			String c = text.substring(i, i+1);
 			if(  checkForCharAndDigits(c) ) {
@@ -293,7 +269,7 @@ public class IndexEngine {
 //			========================================
 //			tokens.add(text.substring(start, i));
 		}
-		
+
 		return tokens;
 	}
 	public static boolean checkForCharAndDigits(String str) {
@@ -311,7 +287,7 @@ public class IndexEngine {
 		PrintWriter writerA = new PrintWriter(localPathProcess + "/index/doc2Id.txt", "UTF-8");
 //		PrintWriter writerB = new PrintWriter(localPathProcess + "/testCollection/id2MetaData.txt", "UTF-8");
 		PrintWriter writerB = new PrintWriter(localPathProcess + "/index/id2MetaData.txt", "UTF-8");
-		
+
 		for (Map.Entry<String, Integer> entry : doc2Id.entrySet()) {
 			String key = (String) entry.getKey();
 			String value = entry.getValue().toString();
@@ -322,7 +298,6 @@ public class IndexEngine {
 	    	String key = entry.getKey().toString();
 	    	String value = getDataFromMetadata(toCopy);
 	    	writerB.println(key + "|" + value);
-//	        System.out.println(key + " = " + value);
 		}
 	    writerA.close();
 	    writerB.close();
@@ -330,23 +305,21 @@ public class IndexEngine {
 //	Grabing the data
 	public static String getDataFromMetadata(metaData value) {
 		String finalValue = "";
-		finalValue = value.getId() + "{}" + value.getDocNo() + 
+		finalValue = value.getId() + "{}" + value.getDocNo() +
 				"{}" + value.getHeadline() + "{}" + value.getDate() + "{}" + value.getDocLength();
 		return finalValue;
 	}
-	//Makes the file 
-	public static void makeFile(ArrayList<String> storage4File, 
-			int internalId, String storage4Data, String localPathProcess) 
+	//Makes the file
+	public static void makeFile(ArrayList<String> storage4File,
+			int internalId, String storage4Data, String localPathProcess)
 					throws FileNotFoundException, UnsupportedEncodingException, ParseException {
 		String id = Integer.toString(internalId);
 		String date = getDateAsNum(storage4Data);
 		File results = new File(localPathProcess + "/filesToBeStored");
-//		File results = new File(localPathProcess + "/testCollection");
 		if(! results.exists()) {
 			results.mkdir();
 		}
 		File directory = new File(localPathProcess + "/filesToBeStored/" + date);
-//		File directory = new File(localPathProcess + "/testCollection/" + date);
 	    if (! directory.exists()){
 	        directory.mkdir();
 	    }

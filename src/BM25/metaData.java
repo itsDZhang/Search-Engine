@@ -29,7 +29,7 @@ public class metaData {
     	this.docLength = length;
     }
     public int getId() {
-    	
+
     	return this.internalId;
     }
     public String getDocNo() {
