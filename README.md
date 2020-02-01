@@ -27,14 +27,6 @@ Note: Does not have a web crawler.
 
 ![Dk](https://i.gyazo.com/bfde795778ec9949c72240008684daa8.png)
 
-#### Language Modelling
-
-![Dirichlet Smoothing](https://i.gyazo.com/d16fa22dec66137ce1de9894a0a5a69a.png)
-
-* Dirichlet Smoothing to avoid the zero probability 
-
-The reason why I will choose Dirichlet smoothing vs other smoothing techniques such as Jelinek-Mercer is because Dirichlet Smoothing takes into consideration the documents' length and therefore smoothes shorter documents more than longer ones. 
-
 ## Indexing
 
 The Index Engine creates an inverted index such that as it is indexing each document, it's also tokenizing each word as an id and mapping it to an postings list. The posting list consists of the document id and the number of times the word appears in that document. Using an inverted index saves a significant amount of space compared to a matrix form. 
